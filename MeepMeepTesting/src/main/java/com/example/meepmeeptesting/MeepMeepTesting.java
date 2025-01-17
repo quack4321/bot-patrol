@@ -9,7 +9,7 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(720);
-        Pose2d initialPose = new Pose2d(11.8, 61.7, Math.PI * 1.5);
+        Pose2d initialPose = new Pose2d(-14, 61.7, Math.PI * 1.5);
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
@@ -17,11 +17,11 @@ public class MeepMeepTesting {
                 .build();
 
         myBot.runAction(myBot.getDrive().actionBuilder(initialPose)
-                .setTangent(0)
-                .splineTo(new Vector2d(60, 60), Math.PI * .25)
+                .splineToLinearHeading(new Pose2d(-55, 60, Math.PI * 1.5), Math.PI * 1)
+
                 .build());
 
-        meepMeep.setBackground(MeepMeep.Background.FIELD_POWERPLAY_OFFICIAL)
+        meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(myBot)
