@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
-@Autonomous(name = "NoBucketStrafe", group = "Autonomous")
-public class NoBucketStrafe extends LinearOpMode {
+@Autonomous(name = "NoBasketStrafe", group = "Autonomous")
+public class NoBasketStrafe extends LinearOpMode {
     @Override
     public void runOpMode() {
         Pose2d initialPose = new Pose2d(-14, 61.7, Math.PI * 1.5);

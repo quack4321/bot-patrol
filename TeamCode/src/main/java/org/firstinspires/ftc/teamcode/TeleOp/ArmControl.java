@@ -149,7 +149,7 @@ public class ArmControl extends OpMode {
         pullExtendOut = 0;
         grabPivotRest = 1700;
         grabPivotGrab = 600;
-        grabPivotScore = 2600;
+        grabPivotScore = 2500;
         grabExtendIn = 0;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
@@ -183,10 +183,7 @@ public class ArmControl extends OpMode {
     @Override
     public void start() {
         preTime = System.currentTimeMillis();
-        switchToAuto();
-        if (!gamepad2.right_stick_button) {
-
-        }
+        switchToDriver();
     }
 
     /*
@@ -209,12 +206,19 @@ public class ArmControl extends OpMode {
         telemetry.addData("grabPivot Current Position: ", grabPivot.getCurrentPosition());
         telemetry.addData("pullPivot Current Position: ", pullPivot.getCurrentPosition());
 
-        switchToDriver();
 
         pullExtend.setPower(gamepad1.left_stick_y * 0.5);
         pullPivot.setPower(gamepad1.left_stick_x * 0.5);
         grabExtend.setPower(gamepad1.right_stick_y * 0.5);
         grabPivot.setPower(gamepad1.right_stick_x * 0.5);
+
+        if (gamepad1.left_stick_button && !leftStickButtonLastTime) {
+            resetPositions();
+        }
+
+        if (gamepad2.left_stick_button && !leftStickButtonLastTime2) {
+            resetPositions();
+        }
 
         aLastTime = gamepad1.a;
         bLastTime = gamepad1.b;
@@ -295,6 +299,11 @@ public class ArmControl extends OpMode {
         pullExtend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         grabPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         pullPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        grabPivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        grabExtend.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pullPivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pullExtend.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void hang() {

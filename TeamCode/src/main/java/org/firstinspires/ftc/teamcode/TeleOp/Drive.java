@@ -134,8 +134,10 @@ public class Drive extends OpMode {
         grabPivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Sets these motors to run in correct direction:
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
         spinny.setDirection(DcMotorSimple.Direction.FORWARD);
 
         driverMode = false;
@@ -149,7 +151,7 @@ public class Drive extends OpMode {
         pullExtendOut = 0;
         grabPivotRest = 1700;
         grabPivotGrab = 600;
-        grabPivotScore = 2600;
+        grabPivotScore = 2500;
         grabExtendIn = 0;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
@@ -159,7 +161,7 @@ public class Drive extends OpMode {
         wristScore = 0.8;
 
 
-        grabArmPosition = "start";
+        grabArmPosition = "rest";
         if (gamepad1.left_bumper && gamepad1.right_bumper) {
             wrist.setPosition(0.65);
             rest();
@@ -228,11 +230,24 @@ public class Drive extends OpMode {
             }
         }
 
+        if (gamepad1.dpad_up && !dpadUpLastTime) {
+            wrist.setPosition(wrist.getPosition() + 0.05);
+        }
+        if (gamepad1.dpad_down && !dpadDownLastTime) {
+            wrist.setPosition(wrist.getPosition() - 0.05);
+        }
+        if (gamepad1.dpad_right && !dpadRightLastTime) {
+            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() + 50);
+        }
+        if (gamepad1.dpad_left && !dpadLeftLastTime) {
+            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 50);
+        }
+
         // Robot strafes if driver1 holds left/right trigger. Drives normally with joysticks if triggers are not pressed
-        leftFront.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-        leftBack.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-        rightFront.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-        rightBack.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+        leftFront.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+        leftBack.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+        rightFront.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+        rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
 
 
         // CONTROLLER 2
@@ -246,14 +261,14 @@ public class Drive extends OpMode {
             spinny.setPower(0);
         }
 
-        // WRIST POSITIONS
-        if (gamepad2.dpad_left && !dpadLeftLastTime2) {
-            wrist.setPosition(0);
-        }
-
-        if (gamepad2.dpad_right && !dpadRightLastTime2) {
-            wrist.setPosition(0.2);
-        }
+//        // WRIST POSITIONS
+//        if (gamepad2.dpad_left && !dpadLeftLastTime2) {
+//            wrist.setPosition(0);
+//        }
+//
+//        if (gamepad2.dpad_right && !dpadRightLastTime2) {
+//            wrist.setPosition(0.2);
+//        }
 
         // A - RESTING POSITIONS
         if (gamepad2.a && !aLastTime2) {
@@ -276,12 +291,16 @@ public class Drive extends OpMode {
 
         if (gamepad2.left_bumper) {
             switchToAuto();
-            pullPivot.setTargetPosition(pullPivot.getCurrentPosition() - 200);
+            pullPivot.setTargetPosition(pullPivot.getCurrentPosition() - 150);
         }
 
         if (gamepad2.right_bumper) {
             switchToAuto();
-            pullPivot.setTargetPosition(pullPivot.getCurrentPosition() + 200);
+            pullPivot.setTargetPosition(pullPivot.getCurrentPosition() + 150);
+        }
+
+        if (gamepad1.left_stick_button && !leftStickButtonLastTime) {
+            resetPositions();
         }
 
         if (gamepad2.left_stick_button && !leftStickButtonLastTime2) {
@@ -295,41 +314,13 @@ public class Drive extends OpMode {
         if (gamepad2.left_trigger > .5) {
             switchToAuto();
         }
-//        if (pullExtend.getMode() == DcMotor.RunMode.RUN_USING_ENCODER) {
-//            pullExtend.setPower(gamepad2.left_stick_y);
-//            pullPivot.setPower(gamepad2.left_stick_x);
-//            grabExtend.setPower(gamepad2.right_stick_y);
-//            grabPivot.setPower(gamepad2.right_stick_x);
-//        }
 
-//        if (gamepad1.x && !xLastTime) {
-//            switchToAuto();
-//            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() + 50);
-//        }
-//        if (gamepad1.a && !aLastTime) {
-//            switchToAuto();
-//            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 50);
-//        }
-//        if (gamepad1.y && !yLastTime) {
-//            switchToAuto();
-//            grabExtend.setTargetPosition(grabExtend.getCurrentPosition() + 50);
-//        }
-//        if (gamepad1.b && !bLastTime) {
-//            switchToAuto();
-//            grabExtend.setTargetPosition(grabExtend.getCurrentPosition() - 50);
-//        }
-        if (gamepad1.dpad_up && !dpadUpLastTime) {
-            wrist.setPosition(wrist.getPosition() + 0.05);
+        if(driverMode) {
+            pullExtend.setPower(gamepad2.left_stick_y);
+            pullPivot.setPower(gamepad2.right_stick_y);
         }
-        if (gamepad1.dpad_down && !dpadDownLastTime) {
-            wrist.setPosition(wrist.getPosition() - 0.05);
-        }
-        if (gamepad1.dpad_right && !dpadRightLastTime) {
-            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() + 10);
-        }
-        if (gamepad1.dpad_left && !dpadLeftLastTime) {
-            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 10);
-        }
+
+
 
         aLastTime = gamepad1.a;
         bLastTime = gamepad1.b;
@@ -388,9 +379,9 @@ public class Drive extends OpMode {
 
     public void switchToDriver() {
         pullPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pullExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        pullPivot.setPower(0);
+        pullPivot.setPower(0);
 
         driverMode = true;
     }
@@ -410,6 +401,11 @@ public class Drive extends OpMode {
         pullExtend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         grabPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         pullPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        grabPivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        grabExtend.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pullPivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        pullExtend.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void hang() {
@@ -516,11 +512,11 @@ public class Drive extends OpMode {
         grabExtend.setPower(0.6);
 
         if(grabArmPosition.equals("rest")) {
-            grabExtend.setTargetPosition(100);
+            grabExtend.setTargetPosition(200);
         }
 
         if(grabArmPosition.equals("grab")) {
-            grabExtend.setTargetPosition(100);
+            grabExtend.setTargetPosition(200);
         }
         wrist.setPosition(wristParallel);
         grabPivot.setTargetPosition(grabPivotScore);
@@ -538,19 +534,19 @@ public class Drive extends OpMode {
     }
 
     public void waitForMotors() {
-        while (pullPivot.getCurrentPosition() < pullPivot.getTargetPosition() - 20 ||
-                pullPivot.getCurrentPosition() > pullPivot.getTargetPosition() + 20 ||
-                pullExtend.getCurrentPosition() < pullExtend.getTargetPosition() - 20 ||
-                pullExtend.getCurrentPosition() > pullExtend.getTargetPosition() + 20
-                || grabPivot.getCurrentPosition() < grabPivot.getTargetPosition() - 20 ||
-                grabPivot.getCurrentPosition() > grabPivot.getTargetPosition() + 20 ||
-                grabExtend.getCurrentPosition() < grabExtend.getTargetPosition() - 20 ||
-                grabExtend.getCurrentPosition() > grabExtend.getTargetPosition() + 20) {
+        while (pullPivot.getCurrentPosition() < pullPivot.getTargetPosition() - 50 ||
+                pullPivot.getCurrentPosition() > pullPivot.getTargetPosition() + 50 ||
+                pullExtend.getCurrentPosition() < pullExtend.getTargetPosition() - 50 ||
+                pullExtend.getCurrentPosition() > pullExtend.getTargetPosition() + 50
+                || grabPivot.getCurrentPosition() < grabPivot.getTargetPosition() - 50 ||
+                grabPivot.getCurrentPosition() > grabPivot.getTargetPosition() + 50 ||
+                grabExtend.getCurrentPosition() < grabExtend.getTargetPosition() - 50 ||
+                grabExtend.getCurrentPosition() > grabExtend.getTargetPosition() + 50) {
 
-            leftFront.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-            leftBack.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-            rightFront.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-            rightBack.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+            leftFront.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+            leftBack.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+            rightFront.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+            rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
 
             telemetry.addData("Speed", speed[speedIndex] * 100 + "%"); // Tells us the wheel motors' current speed
             telemetry.addData("Wrist Position", wrist.getPosition());
