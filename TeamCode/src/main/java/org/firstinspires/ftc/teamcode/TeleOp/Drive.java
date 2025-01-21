@@ -52,8 +52,6 @@ public class Drive extends OpMode {
     int pullPivotRest;
     int pullPivotPull;
     int pullPivotClimb;
-    int pullExtendIn;
-    int pullExtendOut;
     int grabPivotRest;
     int grabPivotGrab;
     int grabPivotScore;
@@ -66,6 +64,13 @@ public class Drive extends OpMode {
     double wristScore;
     long preTime;
     boolean driverMode;
+    boolean isWaitingForMotors;
+    boolean motorsBusy;
+    boolean isResting;
+    boolean isScoring;
+    boolean isGrabbing;
+    boolean isHanging;
+    double initTime;
 
     // Controller 1 Variables:
     boolean rightBumperLastTime;
@@ -99,8 +104,8 @@ public class Drive extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        speed = new float[]{.25f, .5f, .75f, 1.0f};
-        speedIndex = 3;
+        speed = new float[]{.25f, .5f, .75f};
+        speedIndex = 1;
 
         // Initialize hardware values
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");                  // Control Hub 3
@@ -113,7 +118,7 @@ public class Drive extends OpMode {
         pullPivot = hardwareMap.get(DcMotor.class, "pullPivot");                // Expansion Hub 2
         pullExtend = hardwareMap.get(DcMotor.class, "pullExtend");              // Expansion Hub 3
 
-        wrist = hardwareMap.get(Servo.class, "wrist");                          // Control Hub 0
+        wrist = hardwareMap.get(Servo.class, "wrist");                        // Control Hub 0
         spinny = hardwareMap.get(CRServo.class, "spinny");                      // Control Hub 1
 
         // Set motors to brake upon zero power:
@@ -139,12 +144,10 @@ public class Drive extends OpMode {
         pullPivotRest = 5075;
         pullPivotPull = 0;
         pullPivotClimb = 0;
-        pullExtendIn = 0;
-        pullExtendOut = 0;
         grabPivotRest = 1700;
         grabPivotGrab = 600;
         grabPivotScore = 2500;
-        grabExtendIn = 0;
+        grabExtendIn = 100;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
         wristRest = 0.05;
@@ -214,10 +217,10 @@ public class Drive extends OpMode {
             wrist.setPosition(wrist.getPosition() - 0.05);
         }
         if (gamepad1.dpad_right && !dpadRightLastTime) {
-            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() + 50);
+            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() + 100);
         }
         if (gamepad1.dpad_left && !dpadLeftLastTime) {
-            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 50);
+            grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 100);
         }
 
         // Robot strafes if driver1 holds left/right trigger. Drives normally with joysticks if triggers are not pressed
@@ -284,8 +287,47 @@ public class Drive extends OpMode {
         }
 
         if (driverMode) {
-            pullExtend.setPower(gamepad2.left_stick_y);
-            pullPivot.setPower(gamepad2.right_stick_y);
+            grabExtend.setPower(gamepad2.left_stick_y);
+            grabPivot.setPower(gamepad2.right_stick_y);
+        }
+
+        if (isWaitingForMotors) {
+            motorsBusy = Math.abs(pullPivot.getCurrentPosition() - pullPivot.getTargetPosition()) > 64 ||
+                    Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 64 ||
+                    Math.abs(grabPivot.getCurrentPosition() - grabPivot.getTargetPosition()) > 64 ||
+                    Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 64;
+
+            if (System.currentTimeMillis() - initTime > 3000) {
+                motorsBusy = false;
+            }
+
+            if (!motorsBusy) {
+                isWaitingForMotors = false;
+
+                if (isScoring) {
+                    wrist.setPosition(wristScore);
+                    grabExtend.setTargetPosition(grabExtendOut);
+                    grabArmPosition = "score";
+                    isScoring = false;
+                }
+
+                if (isGrabbing) {
+                    wrist.setPosition(wristGrab);
+                    grabArmPosition = "grab";
+                    isGrabbing = false;
+                }
+
+                if (isResting) {
+                    wrist.setPosition(wristRest);
+                    grabArmPosition = "rest";
+                    isResting = false;
+                }
+
+                if (isHanging) {
+                    pullPivot.setTargetPosition(6000);
+                    isHanging = false;
+                }
+            }
         }
 
 
@@ -377,21 +419,28 @@ public class Drive extends OpMode {
 
     public void hang() {
         switchToAuto();
+
+        pullExtend.setPower(1.0);
+        pullPivot.setPower(1.0);
+
         pullExtend.setTargetPosition(12000);
-        waitForMotors();
-        pullPivot.setTargetPosition(6000);
+//        waitForMotors();
+        isWaitingForMotors = true;
+        isHanging = true;
+        initTime = System.currentTimeMillis();
     }
 
     public void rest() {
         switchToAuto();
 
-        grabPivot.setPower(0.5);
-        grabExtend.setPower(0.5);
+        grabPivot.setPower(1.0);
+        grabExtend.setPower(1.0);
 
         if (grabArmPosition.equals("score")) {
-            grabPivot.setPower(0.2);
-            grabExtend.setPower(0.5);
+            grabPivot.setPower(0.5);
+            grabExtend.setPower(1.0);
         }
+
 
         wrist.setPosition(wristParallel);
         pullPivot.setTargetPosition(pullPivotRest);
@@ -399,18 +448,18 @@ public class Drive extends OpMode {
         grabPivot.setTargetPosition(grabPivotRest);
         grabExtend.setTargetPosition(grabExtendIn);
 
-        waitForMotors();
-        wrist.setPosition(wristRest);
-
-        grabArmPosition = "rest";
+//        waitForMotors();
+        isWaitingForMotors = true;
+        isResting = true;
+        initTime = System.currentTimeMillis();
     }
 
     public void grab(boolean isFar) {
         switchToAuto();
 
         if (grabArmPosition.equals("rest")) {
-            grabPivot.setPower(0.6);
-            grabExtend.setPower(0.6);
+            grabPivot.setPower(1.0);
+            grabExtend.setPower(1.0);
 
             wrist.setPosition(wristParallel);
             wait(.5);
@@ -420,14 +469,11 @@ public class Drive extends OpMode {
             } else {
                 grabExtend.setTargetPosition(grabExtendIn);
             }
-
-            waitForMotors();
-            wrist.setPosition(wristGrab);
         }
 
         if (grabArmPosition.equals("grab")) {
-            grabPivot.setPower(0.6);
-            grabExtend.setPower(0.6);
+            grabPivot.setPower(1.0);
+            grabExtend.setPower(1.0);
 
             grabPivot.setTargetPosition(grabPivotGrab);
             if (isFar) {
@@ -435,13 +481,11 @@ public class Drive extends OpMode {
             } else {
                 grabExtend.setTargetPosition(grabExtendIn);
             }
-            waitForMotors();
-            wrist.setPosition(wristGrab);
         }
 
         if (grabArmPosition.equals("score")) {
-            grabPivot.setPower(0.2);
-            grabExtend.setPower(0.4);
+            grabPivot.setPower(0.5);
+            grabExtend.setPower(1.0);
 
             grabPivot.setTargetPosition(grabPivotGrab);
             if (isFar) {
@@ -449,12 +493,12 @@ public class Drive extends OpMode {
             } else {
                 grabExtend.setTargetPosition(grabExtendIn);
             }
-            waitForMotors();
-            wrist.setPosition(wristGrab);
         }
 
-
-        grabArmPosition = "grab";
+//          waitForMotors();
+            isWaitingForMotors = true;
+            isGrabbing = true;
+            initTime = System.currentTimeMillis();
     }
 
     private void score() {
@@ -465,11 +509,11 @@ public class Drive extends OpMode {
         grabExtend.setTargetPosition(200);
         wrist.setPosition(wristParallel);
         grabPivot.setTargetPosition(grabPivotScore);
-        waitForMotors();
-        wrist.setPosition(wristScore);
-        grabExtend.setTargetPosition(grabExtendOut);
 
-        grabArmPosition = "score";
+//        waitForMotors();
+        isWaitingForMotors = true;
+        isScoring = true;
+        initTime = System.currentTimeMillis();
     }
 
     public void wait(double time) {
@@ -496,6 +540,7 @@ public class Drive extends OpMode {
     }
 
     public void waitForMotors() {
+        double initTime = System.currentTimeMillis();
         boolean motorsBusy = true;
 
         while (motorsBusy) {
@@ -506,11 +551,10 @@ public class Drive extends OpMode {
             rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
 
             // Check if all motors have reached their target positions
-            motorsBusy = Math.abs(pullPivot.getCurrentPosition() - pullPivot.getTargetPosition()) > 50 ||
-                    Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 50 ||
-                    Math.abs(grabPivot.getCurrentPosition() - grabPivot.getTargetPosition()) > 50 ||
-
-                    Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 50;
+            motorsBusy = Math.abs(pullPivot.getCurrentPosition() - pullPivot.getTargetPosition()) > 64 ||
+                    Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 64 ||
+                    Math.abs(grabPivot.getCurrentPosition() - grabPivot.getTargetPosition()) > 64 ||
+                    Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 64;
 
             // Update telemetry periodically
             telemetry.addData("Speed", speed[speedIndex] * 100 + "%");
@@ -523,6 +567,10 @@ public class Drive extends OpMode {
             telemetry.addData("grabPivot Current Position", grabPivot.getCurrentPosition());
             telemetry.addData("pullPivot Current Position", pullPivot.getCurrentPosition());
             telemetry.update();
+
+            if (System.currentTimeMillis() - initTime > 3000) {
+                break;
+            }
         }
     }
 }

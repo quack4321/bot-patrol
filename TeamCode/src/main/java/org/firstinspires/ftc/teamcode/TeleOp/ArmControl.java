@@ -207,10 +207,10 @@ public class ArmControl extends OpMode {
         telemetry.addData("pullPivot Current Position: ", pullPivot.getCurrentPosition());
 
 
-        pullExtend.setPower(gamepad1.left_stick_y * 0.5);
-        pullPivot.setPower(gamepad1.left_stick_x * 0.5);
-        grabExtend.setPower(gamepad1.right_stick_y * 0.5);
-        grabPivot.setPower(gamepad1.right_stick_x * 0.5);
+        pullExtend.setPower(gamepad1.left_stick_y * 0.5 + gamepad2.left_stick_y * 0.5);
+        pullPivot.setPower(gamepad1.left_stick_x * 0.5 + gamepad2.left_stick_x * 0.5);
+        grabExtend.setPower(gamepad1.right_stick_y * 0.5 + gamepad2.right_stick_y * 0.5);
+        grabPivot.setPower(gamepad1.right_stick_x * 0.5 + gamepad2.right_stick_x * 0.5);
 
         if (gamepad1.left_stick_button && !leftStickButtonLastTime) {
             resetPositions();

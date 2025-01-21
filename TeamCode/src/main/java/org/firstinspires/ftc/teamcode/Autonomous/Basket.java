@@ -64,7 +64,7 @@ public class Basket extends LinearOpMode {
         grabPivotRest = 1700;
         grabPivotGrab = 600;
         grabPivotScore = 2500;
-        grabExtendIn = 0;
+        grabExtendIn = 100;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
         wristRest = 0.05;
@@ -80,41 +80,45 @@ public class Basket extends LinearOpMode {
 
 
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .splineToLinearHeading(new Pose2d(53, 53, Math.PI * 1.33), Math.PI * 0.25);
+                .splineToLinearHeading(new Pose2d(52, 52, Math.PI * 1.33), Math.PI * 0.25);
 
-        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(53, 53, Math.PI * 1.33))
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(52, 52, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.25)
                 .splineToLinearHeading(new Pose2d(37, 30, Math.PI * 0), Math.PI * 1.25);
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(37, 30, Math.PI * 0))
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(37, 22, Math.PI * 0), Math.PI * 1.5)
+                .splineToLinearHeading(new Pose2d(37, 21, Math.PI * 0), Math.PI * 1.5)
                 .setTangent(Math.PI * 1)
-                .splineToLinearHeading(new Pose2d(34, 22, Math.PI * 0), Math.PI * 1);
+                .splineToLinearHeading(new Pose2d(32.5, 21, Math.PI * 0), Math.PI * 1);
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(34, 22, Math.PI * 0))
+        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(32.5, 21, Math.PI * 0))
                 .setTangent(Math.PI * 0.25)
                 .splineToLinearHeading(new Pose2d(53, 53, Math.PI * 1.33), Math.PI * 0.25);
 
         TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, 53, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.25)
-                .splineToLinearHeading(new Pose2d(42.5, 22, Math.PI * 0), Math.PI * 1.5);
+                .splineToLinearHeading(new Pose2d(41, 21, Math.PI * 0), Math.PI * 1.5);
 
-        TrajectoryActionBuilder tab6 = drive.actionBuilder(new Pose2d(42.5, 22, Math.PI * 0))
+        TrajectoryActionBuilder tab5_1 = drive.actionBuilder(new Pose2d(41, 22, Math.PI * 0))
+                .setTangent(Math.PI * 0)
+                .splineToLinearHeading(new Pose2d(43, 21, Math.PI * 0), Math.PI * 0);
+
+        TrajectoryActionBuilder tab6 = drive.actionBuilder(new Pose2d(43, 21, Math.PI * 0))
                 .setTangent(Math.PI * 0.25)
-                .splineToLinearHeading(new Pose2d(53, 53, Math.PI * 1.33), Math.PI * 0.25);
+                .splineToLinearHeading(new Pose2d(52, 52, Math.PI * 1.33), Math.PI * 0.25);
 
-        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(53, 53, Math.PI * 1.33))
+        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(52, 52, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.25)
-                .splineToLinearHeading(new Pose2d(53, 22, Math.PI * 0), Math.PI * 1.5);
+                .splineToLinearHeading(new Pose2d(51.5, 21, Math.PI * 0), Math.PI * 1.5);
 
-        TrajectoryActionBuilder tab8 = drive.actionBuilder(new Pose2d(53, 22, Math.PI * 0))
-                .setTangent(Math.PI * 0.25)
-                .splineToLinearHeading(new Pose2d(53, 53, Math.PI * 1.33), Math.PI * 0.25);
-
-        TrajectoryActionBuilder tab9 = drive.actionBuilder(new Pose2d(53, 53, Math.PI * 1.33))
-                .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(26, 12, Math.PI * 1), Math.PI * 1);
+//        TrajectoryActionBuilder tab8 = drive.actionBuilder(new Pose2d(53, 21, Math.PI * 0))
+//                .setTangent(Math.PI * 0.25)
+//                .splineToLinearHeading(new Pose2d(53, 53, Math.PI * 1.33), Math.PI * 0.25);
+//
+//        TrajectoryActionBuilder tab9 = drive.actionBuilder(new Pose2d(53, 53, Math.PI * 1.33))
+//                .setTangent(Math.PI * 1.5)
+//                .splineToLinearHeading(new Pose2d(26, 12, Math.PI * 1), Math.PI * 1);
 
         // actions that need to happen on init; for instance, a claw tightening.
         //  Actions.runBlocking(claw.closeClaw());
@@ -123,50 +127,55 @@ public class Basket extends LinearOpMode {
 
         if (isStopRequested()) return;
 
+        // INITIAL SCORE
         score(); // Put arm at score position
-        Actions.runBlocking(new SequentialAction(tab1.build())); // Drive to basket
+        Actions.runBlocking(new SequentialAction(tab1.build())); // Drive to basket for preloaded
         drop(); // Drop preloaded element
+
+        // FIRST BLOCK
         wrist.setPosition(wristParallel); // Get wrist out of the way
         grabClose(); // Begins moving arm to grab position
-        Actions.runBlocking(new SequentialAction(tab2.build())); // Moves to position for next element
-        suck();
-        Actions.runBlocking(new SequentialAction(tab3.build())); // Strafes to position for next element
+        Actions.runBlocking(new SequentialAction(tab2.build())); // Moves to position for first element
+        wrist.setPosition(wristGrab - 0.1);
+        Actions.runBlocking(new SequentialAction(tab3.build())); // Strafes to position for first element
         grabPivot.setTargetPosition(grabPivotGrab - 500);
         wait(0.5);
-        wrist.setPosition(wristGrab + 0.1);
+        wrist.setPosition(wristGrab + 0.05);
+        spinny.setPower(-1.0);
         wait(1.0);
         spinny.setPower(0);
         score();
+
+        // FIRST SCORE
         Actions.runBlocking(new SequentialAction(tab4.build())); // Drive to basket
         drop();
         wrist.setPosition(wristParallel); // Get wrist out of the way
         grabClose(); // Begins moving arm to grab position
-        Actions.runBlocking(new SequentialAction(tab5.build())); // Drive to element
-        suck();
+
+        // SECOND BLOCK
+        Actions.runBlocking(new SequentialAction(tab5.build())); // Drive to second element
+        wrist.setPosition(wristGrab - 0.1);
         wait(0.5);
         grabPivot.setTargetPosition(grabPivotGrab - 500);
-        wait(0.75);
         wrist.setPosition(wristGrab + 0.1);
-        wait(1.75);
+        wait(1.5);
+        Actions.runBlocking(new SequentialAction(tab5_1.build())); // Scoot forward
+        spinny.setPower(-1.0);
+        wait(1.0);
         spinny.setPower(0);
         score();
         Actions.runBlocking(new SequentialAction(tab6.build())); // Drive to basket
         drop();
         wrist.setPosition(wristParallel); // Get wrist out of the way
         grabClose(); // Begins moving arm to grab position
+
+        // THIRD BLOCK
         Actions.runBlocking(new SequentialAction(tab7.build())); // Drive to block
-        suck();
+        wrist.setPosition(wristGrab - 0.1);
         wait(0.5);
         grabPivot.setTargetPosition(grabPivotGrab - 500);
-        wait(0.75);
-        wrist.setPosition(wristGrab + 0.1);
-        wait(1.75);
-        spinny.setPower(0);
-//        score();
-//        Actions.runBlocking(new SequentialAction(tab8.build())); // Drive to basket
-//        drop();
-//        Actions.runBlocking(new SequentialAction(tab9.build())); // Park
-//        rest();
+        wrist.setPosition(wristGrab + 0.05);
+        wait(1.0);
     }
 
     private void score() {
@@ -201,6 +210,9 @@ public class Basket extends LinearOpMode {
         grabPivot.setTargetPosition(grabPivotRest);
         grabExtend.setTargetPosition(grabExtendIn);
 
+        waitForMotors();
+
+        wrist.setPosition(wristRest);
 
     }
 
@@ -222,15 +234,39 @@ public class Basket extends LinearOpMode {
         pullExtend.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
+//    public void waitForMotors() {
+//        while (pullPivot.getCurrentPosition() < pullPivot.getTargetPosition() - 20 ||
+//                pullPivot.getCurrentPosition() > pullPivot.getTargetPosition() + 20 ||
+//                pullExtend.getCurrentPosition() < pullExtend.getTargetPosition() - 20 ||
+//                pullExtend.getCurrentPosition() > pullExtend.getTargetPosition() + 20
+//                || grabPivot.getCurrentPosition() < grabPivot.getTargetPosition() - 20 ||
+//                grabPivot.getCurrentPosition() > grabPivot.getTargetPosition() + 20 ||
+//                grabExtend.getCurrentPosition() < grabExtend.getTargetPosition() - 20 ||
+//                grabExtend.getCurrentPosition() > grabExtend.getTargetPosition() + 20) {
+//            if(isStopRequested()) {
+//                break;
+//            }
+//        }
+//    }
+
     public void waitForMotors() {
-        while (pullPivot.getCurrentPosition() < pullPivot.getTargetPosition() - 20 ||
-                pullPivot.getCurrentPosition() > pullPivot.getTargetPosition() + 20 ||
-                pullExtend.getCurrentPosition() < pullExtend.getTargetPosition() - 20 ||
-                pullExtend.getCurrentPosition() > pullExtend.getTargetPosition() + 20
-                || grabPivot.getCurrentPosition() < grabPivot.getTargetPosition() - 20 ||
-                grabPivot.getCurrentPosition() > grabPivot.getTargetPosition() + 20 ||
-                grabExtend.getCurrentPosition() < grabExtend.getTargetPosition() - 20 ||
-                grabExtend.getCurrentPosition() > grabExtend.getTargetPosition() + 20) ;
+        double initTime = System.currentTimeMillis();
+        boolean motorsBusy = true;
+        while (motorsBusy) {
+            // Check if all motors have reached their target positions
+            motorsBusy = Math.abs(pullPivot.getCurrentPosition() - pullPivot.getTargetPosition()) > 64 ||
+                    Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 64 ||
+                    Math.abs(grabPivot.getCurrentPosition() - grabPivot.getTargetPosition()) > 64 ||
+                    Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 64;
+
+            if (System.currentTimeMillis() - initTime > 3000) {
+                break;
+            }
+
+            if(isStopRequested()) {
+                break;
+            }
+        }
     }
 
     public void grabClose() {
@@ -241,14 +277,13 @@ public class Basket extends LinearOpMode {
         grabExtend.setTargetPosition(grabExtendIn);
     }
 
-    public void suck() {
-        //waitForMotors();
-        wrist.setPosition(wristGrab - 0.1);
-        spinny.setPower(-1.0);
-    }
 
     public void wait(double time) {
         double initTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - initTime < time * 1000) ;
+        while (System.currentTimeMillis() - initTime < time * 1000) {
+            if(isStopRequested()) {
+                break;
+            }
+        }
     }
 }
