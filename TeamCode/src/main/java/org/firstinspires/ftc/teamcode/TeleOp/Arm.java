@@ -81,7 +81,7 @@ public class Arm extends OpMode {
     boolean yLastTime2;
     boolean xLastTime2;
     boolean bLastTime2;
-    boolean dpadUpLastTime2;
+    private boolean dpadUpLastTime2;
     boolean dpadDownLastTime2;
     boolean dpadLeftLastTime2;
     boolean dpadRightLastTime2;
