@@ -314,7 +314,7 @@ public class Drive extends OpMode {
         if (isWaitingForMotors) {
             motorsBusy = /*Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 64 || */
                     Math.abs(grabPivot.getCurrentPosition() - grabPivot.getTargetPosition()) > 64 ||
-                    Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 64;
+                            Math.abs(grabExtend.getCurrentPosition() - grabExtend.getTargetPosition()) > 64;
 
             if (System.currentTimeMillis() - initTime > 3000) {
                 motorsBusy = false;
@@ -325,7 +325,7 @@ public class Drive extends OpMode {
 
                 if (isScoring) {
                     wrist.setPosition(wristScore);
-                    //   grabExtend.setTargetPosition(grabExtendOut);
+                    grabExtend.setTargetPosition(grabExtendOut);
                     grabArmPosition = "score";
                     isScoring = false;
                 }
