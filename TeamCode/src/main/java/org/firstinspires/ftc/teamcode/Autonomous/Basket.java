@@ -27,7 +27,7 @@ public class Basket extends LinearOpMode {
 
     // Predefined positions of the motors:
     int pullPivotRest;
-    int pullPivotPull;
+    int pullPivotHang;
     int pullExtendIn;
     int pullExtendOut;
     int grabPivotRest;
@@ -83,10 +83,10 @@ public class Basket extends LinearOpMode {
         isHoldingGrabPivot = false;
 
         // Predefined motor positions:
-        pullPivotRest = 5075;
-        pullPivotPull = 6000;
-        pullExtendIn = 0;
-        pullExtendOut = 6000;
+        pullPivotRest = -2400;
+        pullPivotHang = -1160;
+        pullExtendIn = -100;
+        pullExtendOut = -7777;
         grabPivotRest = 1700;
         grabPivotGrab = 920;
         grabPivotScore = 2500;

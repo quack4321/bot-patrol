@@ -41,10 +41,8 @@ public class Arm extends OpMode {
 
     // Predefined positions of the motors:
     String grabArmPosition;
-    int pullPivotStart;
     int pullPivotRest;
-    int pullPivotPull;
-    int pullPivotClimb;
+    int pullPivotHang;
     int pullExtendIn;
     int pullExtendOut;
     int grabPivotRest;
@@ -57,6 +55,7 @@ public class Arm extends OpMode {
     double wristGrab;
     double wristParallel;
     double wristScore;
+    double wristHang;
     long preTime;
     boolean driverMode;
 
@@ -114,12 +113,10 @@ public class Arm extends OpMode {
         driverMode = false;
 
         // Predefined motor positions:
-        pullPivotStart = 6300;
-        pullPivotRest = 5075;
-        pullPivotPull = 0;
-        pullPivotClimb = 0;
-        pullExtendIn = 0;
-        pullExtendOut = 0;
+        pullPivotHang = -1450;
+        pullPivotRest = -2400;
+        pullExtendIn = -100;
+        pullExtendOut = -7777;
         grabPivotRest = 1700;
         grabPivotGrab = 600;
         grabPivotScore = 2500;
@@ -130,6 +127,7 @@ public class Arm extends OpMode {
         wristGrab = 0.5;
         wristParallel = 0.6;
         wristScore = 0.8;
+        wristHang = 1.0;
 
         grabArmPosition = "start";
 
