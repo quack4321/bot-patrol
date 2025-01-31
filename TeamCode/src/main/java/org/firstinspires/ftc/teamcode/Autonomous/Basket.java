@@ -32,7 +32,7 @@ public class Basket extends LinearOpMode {
     int pullExtendOut;
     int grabPivotRest;
     int grabPivotGrab;
-    int grabPivotGrabFar;
+    int grabPivotDown;
     int grabPivotScore;
     int grabExtendIn;
     int grabExtendMid;
@@ -89,6 +89,7 @@ public class Basket extends LinearOpMode {
         pullExtendOut = -7777;
         grabPivotRest = 1700;
         grabPivotGrab = 920;
+        grabPivotDown = 580;
         grabPivotScore = 2500;
         grabExtendIn = 100;
         grabExtendMid = 1080;
@@ -99,7 +100,7 @@ public class Basket extends LinearOpMode {
         wristParallel = 0.6;
         wristScore = 0.8;
         grabbyOpen = 0.54;
-        grabbyClosed = 0.46;
+        grabbyClosed = 0.455;
         twistyParallel = 0.46;
         twistyPerpendicular = 0.15;
 
@@ -139,12 +140,12 @@ public class Basket extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(54, 58, Math.PI * 1.33), Math.PI * 0.6);
         // Drop block 2
 
-        TrajectoryActionBuilder tab6 = drive.actionBuilder(new Pose2d(54, 58, Math.PI * 1.33))
+        TrajectoryActionBuilder tab6 = drive.slowerActionBuilder(new Pose2d(54, 58, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(56.5, 19, Math.PI * 0), Math.PI * 0);
+                .splineToLinearHeading(new Pose2d(56, 19.5, Math.PI * 0), Math.PI * 0);
         // Grab block 3
 
-        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(56.5, 19, Math.PI * 0))
+        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(56, 19.5, Math.PI * 0))
                 .setTangent(Math.PI * 0.5)
                 .splineToLinearHeading(new Pose2d(56, 58, Math.PI * 1.33), Math.PI * 0.5);
         // Drop block 3
@@ -169,10 +170,10 @@ public class Basket extends LinearOpMode {
         // Drives to and grabs block 1
         grab();
         Actions.runBlocking(new SequentialAction(tab2.build()));
-        grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 300);
+        grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
         grabby.setPosition(grabbyClosed);
-        wait(0.5);
+        wait(0.1);
 
         // Scores block 1
         score();
@@ -186,10 +187,10 @@ public class Basket extends LinearOpMode {
         // Drives to and grabs block 2
         grab();
         Actions.runBlocking(new SequentialAction(tab4.build()));
-        grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 300);
+        grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
         grabby.setPosition(grabbyClosed);
-        wait(0.5);
+        wait(0.1);
 
         // Scores block 2
         score();
@@ -204,14 +205,13 @@ public class Basket extends LinearOpMode {
         grab();
         twisty.setPosition(twistyPerpendicular);
         Actions.runBlocking(new SequentialAction(tab6.build()));
-        grabPivot.setTargetPosition(grabPivot.getCurrentPosition() - 300);
+        grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
         grabby.setPosition(grabbyClosed);
-        wait(0.2);
+        wait(0.1);
         grabPivot.setTargetPosition(grabPivotScore);
         wait(0.2);
         wrist.setPosition(wristGrab - 0.1);
-        wait(1.5);
 
 
         // Scores block 3
@@ -224,16 +224,17 @@ public class Basket extends LinearOpMode {
         wait(0.5);
         // Parks in position for TeleOp
         grab();
+        wrist.setPosition(wristParallel);
+        twisty.setPosition(twistyPerpendicular);
         Actions.runBlocking(new SequentialAction(tab8.build()));
     }
 
     private void score() {
         switchToAuto();
         grabPivot.setPower(1.0);
-        grabExtend.setPower(1.0);
+        grabExtend.setPower(0.6);
 
         grabExtend.setTargetPosition(200);
-        wrist.setPosition(wristParallel);
         grabPivot.setTargetPosition(grabPivotScore);
         waitForMotors();
         twisty.setPosition(twistyParallel);
@@ -266,10 +267,11 @@ public class Basket extends LinearOpMode {
         wrist.setPosition(wristParallel);
         grabby.setPosition(grabbyOpen);
 
-        grabPivot.setPower(0.5);
+        grabPivot.setPower(0.6);
         grabExtend.setPower(1.0);
 
         grabPivot.setTargetPosition(grabPivotGrab);
+        wait(0.25);
         grabExtend.setTargetPosition(grabExtendIn);
 
         waitForMotors();

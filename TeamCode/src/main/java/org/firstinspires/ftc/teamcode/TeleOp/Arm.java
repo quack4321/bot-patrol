@@ -189,7 +189,6 @@ public class Arm extends OpMode {
             twisty.setPosition(twisty.getPosition() + 0.05);
         }
 
-
         if (gamepad1.left_stick_button && !leftStickButtonLastTime) {
             resetPositions();
         }

@@ -102,8 +102,16 @@ public final class MecanumDrive {
                     kinematics.new WheelVelConstraint(PARAMS.maxWheelVel),
                     new AngularVelConstraint(PARAMS.maxAngVel)
             ));
+
+    public final VelConstraint slowerVelConstraint =
+            new MinVelConstraint(Arrays.asList(
+                    kinematics.new WheelVelConstraint(20),
+                    new AngularVelConstraint(20)
+            ));
     public final AccelConstraint defaultAccelConstraint =
             new ProfileAccelConstraint(PARAMS.minProfileAccel, PARAMS.maxProfileAccel);
+    public final AccelConstraint slowerAccelConstraint =
+            new ProfileAccelConstraint(-10, PARAMS.maxProfileAccel);
 
     public final DcMotorEx leftFront, leftBack, rightBack, rightFront;
 
@@ -494,6 +502,22 @@ public final class MecanumDrive {
                 beginPose, 0.0,
                 defaultTurnConstraints,
                 defaultVelConstraint, defaultAccelConstraint
+        );
+    }
+
+    public TrajectoryActionBuilder slowerActionBuilder(Pose2d beginPose) {
+        return new TrajectoryActionBuilder(
+                TurnAction::new,
+                FollowTrajectoryAction::new,
+                new TrajectoryBuilderParams(
+                        1e-6,
+                        new ProfileParams(
+                                0.25, 0.1, 1e-2
+                        )
+                ),
+                beginPose, 0.0,
+                defaultTurnConstraints,
+                defaultVelConstraint, slowerAccelConstraint
         );
     }
 }

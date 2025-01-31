@@ -42,7 +42,7 @@ public class Drive extends OpMode {
     int pullExtendOut;
     int grabPivotRest;
     int grabPivotGrab;
-    int grabPivotGrabFar;
+    int grabPivotDown;
     int grabPivotScore;
     int grabExtendIn;
     int grabExtendMid;
@@ -63,12 +63,11 @@ public class Drive extends OpMode {
     boolean isResting;
     boolean isScoring;
     boolean isGrabbing;
-    boolean isHanging;
+    boolean isPullExtendOut;
     boolean isTwistyParallel;
     boolean isGrabbyOpen;
     boolean isHoldingGrabExtend;
     boolean isHoldingGrabPivot;
-    boolean isPullExtendOut;
     double initTime;
 
     // Controller 1 Variables:
@@ -142,7 +141,7 @@ public class Drive extends OpMode {
         isHoldingGrabExtend = false;
         isHoldingGrabPivot = false;
         isPullExtendOut = false;
-        isHanging = false;
+        isPullExtendOut = false;
 
         // Predefined motor positions:
         pullPivotHang = -1160;
@@ -151,6 +150,7 @@ public class Drive extends OpMode {
         pullExtendOut = -7777;
         grabPivotRest = 1700;
         grabPivotGrab = 920;
+        grabPivotDown = 590;
         grabPivotScore = 2500;
         grabExtendIn = 100;
         grabExtendMid = 1080;
@@ -266,10 +266,10 @@ public class Drive extends OpMode {
             grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabPivot.setPower(0.4);
             isHoldingGrabPivot = false;
-        } else if (gamepad2.dpad_left) {
-            grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            grabPivot.setPower(-0.4);
-            isHoldingGrabPivot = false;
+        } else if (gamepad2.dpad_left && grabPivot.getCurrentPosition() > grabPivotDown) {
+                grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                grabPivot.setPower(-0.4);
+                isHoldingGrabPivot = false;
         } else if (!isHoldingGrabPivot) {
             grabPivot.setTargetPosition(grabPivot.getCurrentPosition());
             grabPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -293,13 +293,11 @@ public class Drive extends OpMode {
         }
 
         if (gamepad2.right_bumper && !rightBumperLastTime2) {
-            pullPivot.setPower(0.2);
-            pullPivot.setTargetPosition(pullPivot.getTargetPosition() + 20);
+                pullPivot.setTargetPosition(pullPivotHang);
         }
 
         if (gamepad2.left_bumper && !leftBumperLastTime2) {
-            pullPivot.setPower(0.2);
-            pullPivot.setTargetPosition(pullPivot.getTargetPosition() - 20);
+                pullPivot.setTargetPosition(pullPivotRest);
         }
 
         if (gamepad2.left_trigger > .5) {
@@ -319,9 +317,6 @@ public class Drive extends OpMode {
             pullPivot.setPower(gamepad2.right_stick_y);
         }
 
-        if (System.currentTimeMillis() - preTime > 5000 && !(System.currentTimeMillis() - preTime > 6000)) {
-            pullExtend.setTargetPosition(pullExtendOut);
-        }
 
         if (isWaitingForMotors) {
             motorsBusy = Math.abs(pullExtend.getCurrentPosition() - pullExtend.getTargetPosition()) > 64 ||
@@ -337,6 +332,7 @@ public class Drive extends OpMode {
 
                 if (isScoring) {
                     wrist.setPosition(wristScore);
+                    twisty.setPosition(twistyParallel);
                     grabExtend.setTargetPosition(grabExtendOut);
                     grabArmPosition = "score";
                     isScoring = false;
@@ -422,12 +418,14 @@ public class Drive extends OpMode {
         grabPivot.setTargetPosition(100);
         wrist.setPosition(wristHang);
 
-        pullExtend.setTargetPosition(pullExtendIn);
-
-        if (isHanging) {
-            pullPivot.setTargetPosition(pullPivotHang);
+        if (isPullExtendOut) {
+            pullExtend.setTargetPosition(pullExtendIn);
+            isPullExtendOut = false;
+        } else {
+            pullExtend.setTargetPosition(pullExtendOut);
+            isPullExtendOut = true;
         }
-        isHanging = true;
+
     }
 
     public void rest() {
@@ -455,7 +453,7 @@ public class Drive extends OpMode {
 
         isWaitingForMotors = true;
         isResting = true;
-        isHanging = false;
+        isPullExtendOut = false;
         initTime = System.currentTimeMillis();
     }
 
