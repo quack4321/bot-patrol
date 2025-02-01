@@ -32,7 +32,9 @@ public class Drive extends OpMode {
 
     String grabArmPosition;
     int speedIndex;
-    float[] speed;
+    int twistIndex;
+    double[] speed;
+    double[] twists;
 
 
     // Predefined positions of the motors:
@@ -64,7 +66,6 @@ public class Drive extends OpMode {
     boolean isScoring;
     boolean isGrabbing;
     boolean isPullExtendOut;
-    boolean isTwistyParallel;
     boolean isGrabbyOpen;
     boolean isHoldingGrabExtend;
     boolean isHoldingGrabPivot;
@@ -102,8 +103,10 @@ public class Drive extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        speed = new float[]{.25f, .5f, .75f};
+        speed = new double[]{.25, .5, .75};
+        twists = new double[]{0.15, 0.3, 0.45, 0.6};
         speedIndex = 1;
+        twistIndex = 0;
 
         // Initialize hardware values
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");              // Control Hub 0
@@ -136,11 +139,9 @@ public class Drive extends OpMode {
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
         driverMode = false;
-        isTwistyParallel = false;
         isGrabbyOpen = false;
         isHoldingGrabExtend = false;
         isHoldingGrabPivot = false;
-        isPullExtendOut = false;
         isPullExtendOut = false;
 
         // Predefined motor positions:
@@ -200,12 +201,12 @@ public class Drive extends OpMode {
 
         // CONTROLLER 1
         if (gamepad1.a && !aLastTime) {
-            if (!isTwistyParallel) {
+            if (twistIndex != 2) {
                 twisty.setPosition(twistyParallel);
-                isTwistyParallel = true;
+                twistIndex = 2;
             } else {
                 twisty.setPosition(twistyPerpendicular);
-                isTwistyParallel = false;
+                twistIndex = 0;
             }
         }
 
@@ -225,6 +226,20 @@ public class Drive extends OpMode {
 
         if (gamepad1.dpad_down && !dpadDownLastTime) {
             wrist.setPosition(wrist.getPosition() - 0.05);
+        }
+
+        if (gamepad1.dpad_left && !dpadLeftLastTime) {
+            if (twistIndex > 0) {
+                twistIndex--;
+                twisty.setPosition(twists[twistIndex]);
+            }
+        }
+
+        if (gamepad1.dpad_right && !dpadRightLastTime) {
+            if (twistIndex < 3) {
+                twistIndex++;
+                twisty.setPosition(twists[twistIndex]);
+            }
         }
 
         if (gamepad1.right_bumper && !rightBumperLastTime) {
@@ -267,9 +282,9 @@ public class Drive extends OpMode {
             grabPivot.setPower(0.4);
             isHoldingGrabPivot = false;
         } else if (gamepad2.dpad_left && grabPivot.getCurrentPosition() > grabPivotDown) {
-                grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                grabPivot.setPower(-0.4);
-                isHoldingGrabPivot = false;
+            grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            grabPivot.setPower(-0.4);
+            isHoldingGrabPivot = false;
         } else if (!isHoldingGrabPivot) {
             grabPivot.setTargetPosition(grabPivot.getCurrentPosition());
             grabPivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -293,11 +308,11 @@ public class Drive extends OpMode {
         }
 
         if (gamepad2.right_bumper && !rightBumperLastTime2) {
-                pullPivot.setTargetPosition(pullPivotHang);
+            pullPivot.setTargetPosition(pullPivotHang);
         }
 
         if (gamepad2.left_bumper && !leftBumperLastTime2) {
-                pullPivot.setTargetPosition(pullPivotRest);
+            pullPivot.setTargetPosition(pullPivotRest);
         }
 
         if (gamepad2.left_trigger > .5) {
@@ -414,9 +429,6 @@ public class Drive extends OpMode {
         switchToAuto();
         pullExtend.setPower(1.0);
         grabPivot.setPower(0.5);
-
-        grabPivot.setTargetPosition(100);
-        wrist.setPosition(wristHang);
 
         if (isPullExtendOut) {
             pullExtend.setTargetPosition(pullExtendIn);
