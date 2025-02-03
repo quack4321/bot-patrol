@@ -87,16 +87,15 @@ public class Basket extends LinearOpMode {
         pullPivotHang = -1160;
         pullExtendIn = -100;
         pullExtendOut = -7777;
-        grabPivotRest = 1700;
+        grabPivotRest = 1610;
         grabPivotGrab = 920;
         grabPivotDown = 580;
         grabPivotScore = 2500;
         grabExtendIn = 100;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
-
-        wristRest = 0;
-        wristGrab = 0.2;
+        wristRest = 0.05;
+        wristGrab = 0.25;
         wristParallel = 0.6;
         wristScore = 0.8;
         grabbyOpen = 0.54;
@@ -108,7 +107,6 @@ public class Basket extends LinearOpMode {
         twisty.setPosition(twistyPerpendicular);
         grabby.setPosition(grabbyClosed);
 
-        switchToAuto();
         rest();
 
 
@@ -122,35 +120,35 @@ public class Basket extends LinearOpMode {
 
         TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(54, 58, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.25)
-                .splineToLinearHeading(new Pose2d(44.5, 37, Math.PI * 1.5), Math.PI * 1.5);
+                .splineToLinearHeading(new Pose2d(44.25, 35, Math.PI * 1.5), Math.PI * 1.5);
         // Grab block 1
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(44.5, 37, Math.PI * 1.5))
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(44.25, 35, Math.PI * 1.5))
                 .setTangent(Math.PI * 0.25)
-                .splineToLinearHeading(new Pose2d(54, 58, Math.PI * 1.33), Math.PI * 0.25);
+                .splineToLinearHeading(new Pose2d(56, 58.5, Math.PI * 1.33), Math.PI * 0.25);
         // Drop block 1
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(54, 58, Math.PI * 1.33))
+        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(56, 58.5, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(53.5, 37, Math.PI * 1.5), Math.PI * 1.5);
+                .splineToLinearHeading(new Pose2d(54.25, 35, Math.PI * 1.5), Math.PI * 1.5);
         // Grab block 2
 
-        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53.5, 37, Math.PI * 1.5))
+        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(54.25, 35, Math.PI * 1.5))
                 .setTangent(Math.PI * 0.6)
-                .splineToLinearHeading(new Pose2d(54, 58, Math.PI * 1.33), Math.PI * 0.6);
+                .splineToLinearHeading(new Pose2d(55, 57.5, Math.PI * 1.33), Math.PI * 0.6);
         // Drop block 2
 
-        TrajectoryActionBuilder tab6 = drive.slowerActionBuilder(new Pose2d(54, 58, Math.PI * 1.33))
+        TrajectoryActionBuilder tab6 = drive.slowerActionBuilder(new Pose2d(55, 57.5, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(56, 19.5, Math.PI * 0), Math.PI * 0);
+                .splineToLinearHeading(new Pose2d(56.25, 19, Math.PI * 0), Math.PI * 0);
         // Grab block 3
 
-        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(56, 19.5, Math.PI * 0))
+        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(56.25, 19, Math.PI * 0))
                 .setTangent(Math.PI * 0.5)
-                .splineToLinearHeading(new Pose2d(56, 58, Math.PI * 1.33), Math.PI * 0.5);
+                .splineToLinearHeading(new Pose2d(56, 56, Math.PI * 1.33), Math.PI * 0.5);
         // Drop block 3
 
-        TrajectoryActionBuilder tab8 = drive.actionBuilder(new Pose2d(56, 58, Math.PI * 1.33))
+        TrajectoryActionBuilder tab8 = drive.actionBuilder(new Pose2d(56, 56, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.5)
                 .splineToLinearHeading(new Pose2d(26, 12, Math.PI * 1), Math.PI * 1);
 
@@ -164,6 +162,7 @@ public class Basket extends LinearOpMode {
         wrist.setPosition(wristScore);
         wait(0.5);
         grabby.setPosition(grabbyOpen);
+        wait(0.1);
         wrist.setPosition(wristParallel);
         wait(0.5);
 
@@ -181,6 +180,7 @@ public class Basket extends LinearOpMode {
         wrist.setPosition(wristScore);
         wait(0.5);
         grabby.setPosition(grabbyOpen);
+        wait(0.1);
         wrist.setPosition(wristParallel);
         wait(0.5);
 
@@ -198,6 +198,7 @@ public class Basket extends LinearOpMode {
         wrist.setPosition(wristScore);
         wait(0.5);
         grabby.setPosition(grabbyOpen);
+        wait(0.1);
         wrist.setPosition(wristParallel);
         wait(0.5);
 
@@ -220,6 +221,7 @@ public class Basket extends LinearOpMode {
         wrist.setPosition(wristScore);
         wait(0.5);
         grabby.setPosition(grabbyOpen);
+        wait(0.1);
         wrist.setPosition(wristParallel);
         wait(0.5);
         // Parks in position for TeleOp
