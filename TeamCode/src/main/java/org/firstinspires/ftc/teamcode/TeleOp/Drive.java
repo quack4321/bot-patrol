@@ -107,7 +107,7 @@ public class Drive extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        speed = new double[]{.35, .75};
+        speed = new double[]{.35, 0.85};
         speedIndex = 1;
 
         // Initialize hardware values
@@ -219,6 +219,7 @@ public class Drive extends OpMode {
                 isTwisty45 = false;
             }
         }
+
         if (gamepad1.b && !bLastTime) {
             if (!isTwisty45) {
                 twisty.setPosition(twisty45);
@@ -250,13 +251,13 @@ public class Drive extends OpMode {
         }
 
         if (gamepad1.dpad_left && !dpadLeftLastTime) {
-            twisty.setPosition(twisty.getPosition() + 0.05);
+            twisty.setPosition(twisty.getPosition() + 0.1);
             isTwistyParallel = false;
             isTwisty45 = false;
         }
 
         if (gamepad1.dpad_right && !dpadRightLastTime) {
-            twisty.setPosition(twisty.getPosition() - 0.05);
+            twisty.setPosition(twisty.getPosition() - 0.1);
             isTwistyParallel = false;
             isTwisty45 = false;
         }

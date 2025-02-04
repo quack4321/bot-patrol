@@ -173,6 +173,15 @@ public class Arm extends OpMode {
             grabby.setPosition(grabby.getPosition() - 0.05);
         }
 
+        if (gamepad1.x && !xLastTime) {
+            wrist.getController().pwmDisable();
+        }
+
+        if (gamepad1.y && !yLastTime) {
+            wrist.getController().pwmEnable();
+            wrist.setPosition(wristParallel);
+        }
+
         if (gamepad1.dpad_up && !dpadUpLastTime) {
             wrist.setPosition(wrist.getPosition() + 0.05);
         }
