@@ -20,6 +20,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -28,7 +29,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Drive extends OpMode {
     DcMotor rightFront, leftFront, leftBack, rightBack, grabExtend, grabPivot, pullExtend, pullPivot;
-    Servo wrist, grabby, twisty;
+    Servo wrist;
+    CRServo wheel1, wheel2;
 
     String grabArmPosition;
     int speedIndex;
@@ -122,8 +124,8 @@ public class Drive extends OpMode {
         pullExtend = hardwareMap.get(DcMotor.class, "pullExtend");              // Expansion Hub 3
 
         wrist = hardwareMap.get(Servo.class, "wrist");                          // Control Hub 0
-        grabby = hardwareMap.get(Servo.class, "grabby");                        // Control Hub 1
-        twisty = hardwareMap.get(Servo.class, "twisty");                        // Control Hub 2
+        wheel1 = hardwareMap.get(CRServo.class, "wheel1");                      // Control Hub 1
+        wheel2 = hardwareMap.get(CRServo.class, "wheel2");                      // Control Hub 2
 
         // Set motors to brake upon zero power:
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -176,8 +178,6 @@ public class Drive extends OpMode {
         twisty135 = 0.6;
 
         grabArmPosition = "rest";
-        twisty.setPosition(twistyPerpendicular);
-        grabby.setPosition(grabbyClosed);
 
         switchToAuto();
     }
@@ -192,8 +192,6 @@ public class Drive extends OpMode {
         // Displays info on Driver Hub:
         telemetry.addData("Speed", speed[speedIndex] * 100 + "%"); // Tells us the wheel motors' current speed
         telemetry.addData("Wrist Position", wrist.getPosition());
-        telemetry.addData("Twisty Position", twisty.getPosition());
-        telemetry.addData("Grabby Position", grabby.getPosition());
 
         telemetry.addData("grabExtend Target Position: ", grabExtend.getTargetPosition());
         telemetry.addData("pullExtend Target Position: ", pullExtend.getTargetPosition());
@@ -209,37 +207,13 @@ public class Drive extends OpMode {
 
         // CONTROLLER 1
         if (gamepad1.a && !aLastTime) {
-            if (!isTwistyParallel) {
-                twisty.setPosition(twistyParallel);
-                isTwistyParallel = true;
-                isTwisty45 = false;
-            } else {
-                twisty.setPosition(twistyPerpendicular);
-                isTwistyParallel = false;
-                isTwisty45 = false;
-            }
-        }
-
-        if (gamepad1.b && !bLastTime) {
-            if (!isTwisty45) {
-                twisty.setPosition(twisty45);
-                isTwistyParallel = false;
-                isTwisty45 = true;
-            } else {
-                twisty.setPosition(twisty135);
-                isTwistyParallel = false;
-                isTwisty45 = false;
-            }
+            wheel1.setPower(1.0);
+            wheel2.setPower(-1.0);
         }
 
         if (gamepad1.x && !xLastTime) {
-            if (isGrabbyOpen) {
-                grabby.setPosition(grabbyClosed);
-                isGrabbyOpen = false;
-            } else {
-                grabby.setPosition(grabbyOpen);
-                isGrabbyOpen = true;
-            }
+            wheel1.setPower(-1.0);
+            wheel2.setPower(1.0);
         }
 
         if (gamepad1.dpad_up && !dpadUpLastTime) {
@@ -248,18 +222,6 @@ public class Drive extends OpMode {
 
         if (gamepad1.dpad_down && !dpadDownLastTime) {
             wrist.setPosition(wrist.getPosition() - 0.05);
-        }
-
-        if (gamepad1.dpad_left && !dpadLeftLastTime) {
-            twisty.setPosition(twisty.getPosition() + 0.1);
-            isTwistyParallel = false;
-            isTwisty45 = false;
-        }
-
-        if (gamepad1.dpad_right && !dpadRightLastTime) {
-            twisty.setPosition(twisty.getPosition() - 0.1);
-            isTwistyParallel = false;
-            isTwisty45 = false;
         }
 
         if (gamepad1.right_bumper && !rightBumperLastTime) {
@@ -374,7 +336,6 @@ public class Drive extends OpMode {
 
                 if (isScoring) {
                     wrist.setPosition(wristScore);
-                    twisty.setPosition(twistyParallel);
                     grabExtend.setTargetPosition(grabExtendOut);
                     grabArmPosition = "score";
                     isScoring = false;
@@ -478,7 +439,6 @@ public class Drive extends OpMode {
         if (!grabArmPosition.equals("grab")) {
             wrist.setPosition(wristParallel);
         }
-        twisty.setPosition(twistyPerpendicular);
 
         if (grabArmPosition.equals("score")) {
             grabPivot.setPower(0.5);
@@ -499,7 +459,6 @@ public class Drive extends OpMode {
     public void grab() {
         switchToAuto();
 
-        grabby.setPosition(grabbyOpen);
         isGrabbyOpen = true;
 
         if (grabArmPosition.equals("rest")) {
