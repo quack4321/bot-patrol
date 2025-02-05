@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -18,7 +19,8 @@ public class Basket extends LinearOpMode {
 
 
     DcMotor rightFront, leftFront, leftBack, rightBack, grabExtend, grabPivot, pullExtend, pullPivot;
-    Servo wrist, grabby, twisty;
+    Servo wrist;
+    CRServo wheel1, wheel2;
 
     String grabArmPosition;
     int speedIndex;
@@ -73,8 +75,8 @@ public class Basket extends LinearOpMode {
         pullExtend = hardwareMap.get(DcMotor.class, "pullExtend");              // Expansion Hub 3
 
         wrist = hardwareMap.get(Servo.class, "wrist");                          // Control Hub 0
-        grabby = hardwareMap.get(Servo.class, "grabby");                        // Control Hub 1
-        twisty = hardwareMap.get(Servo.class, "twisty");                        // Control Hub 2
+        wheel1 = hardwareMap.get(CRServo.class, "wheel1");                      // Control Hub 1
+        wheel2 = hardwareMap.get(CRServo.class, "wheel2");                      // Control Hub 2
 
         driverMode = false;
         isTwistyParallel = false;
@@ -104,8 +106,6 @@ public class Basket extends LinearOpMode {
         twistyPerpendicular = 0.15;
 
         grabArmPosition = "rest";
-        twisty.setPosition(twistyPerpendicular);
-        grabby.setPosition(grabbyClosed);
 
         rest();
 
@@ -140,10 +140,10 @@ public class Basket extends LinearOpMode {
 
         TrajectoryActionBuilder tab6 = drive.slowerActionBuilder(new Pose2d(55, 57.5, Math.PI * 1.33))
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(56.25, 19, Math.PI * 0), Math.PI * 0);
+                .splineToLinearHeading(new Pose2d(62, 38 , Math.PI * 1.75), Math.PI * 1.75);
         // Grab block 3
 
-        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(56.25, 19, Math.PI * 0))
+        TrajectoryActionBuilder tab7 = drive.actionBuilder(new Pose2d(62, 38, Math.PI * 1.75))
                 .setTangent(Math.PI * 0.5)
                 .splineToLinearHeading(new Pose2d(56, 56, Math.PI * 1.33), Math.PI * 0.5);
         // Drop block 3
@@ -160,9 +160,8 @@ public class Basket extends LinearOpMode {
         score();
         Actions.runBlocking(new SequentialAction(tab1.build()));
         wrist.setPosition(wristScore);
-        wait(0.5);
-        grabby.setPosition(grabbyOpen);
         wait(0.1);
+        dispense();
         wrist.setPosition(wristParallel);
         wait(0.5);
 
@@ -171,16 +170,14 @@ public class Basket extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(tab2.build()));
         grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
-        grabby.setPosition(grabbyClosed);
-        wait(0.1);
+        capture();
 
         // Scores block 1
         score();
         Actions.runBlocking(new SequentialAction(tab3.build()));
         wrist.setPosition(wristScore);
         wait(0.5);
-        grabby.setPosition(grabbyOpen);
-        wait(0.1);
+        dispense();
         wrist.setPosition(wristParallel);
         wait(0.5);
 
@@ -189,7 +186,7 @@ public class Basket extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(tab4.build()));
         grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
-        grabby.setPosition(grabbyClosed);
+        capture();
         wait(0.1);
 
         // Scores block 2
@@ -197,19 +194,16 @@ public class Basket extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(tab5.build()));
         wrist.setPosition(wristScore);
         wait(0.5);
-        grabby.setPosition(grabbyOpen);
-        wait(0.1);
+        dispense();
         wrist.setPosition(wristParallel);
         wait(0.5);
 
         // Drives to and grabs block 3
         grab();
-        twisty.setPosition(twistyPerpendicular);
         Actions.runBlocking(new SequentialAction(tab6.build()));
         grabPivot.setTargetPosition(grabPivotDown);
         wait(0.5);
-        grabby.setPosition(grabbyClosed);
-        wait(0.1);
+        capture();
         grabPivot.setTargetPosition(grabPivotScore);
         wait(0.2);
         wrist.setPosition(wristGrab - 0.1);
@@ -220,14 +214,12 @@ public class Basket extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(tab7.build()));
         wrist.setPosition(wristScore);
         wait(0.5);
-        grabby.setPosition(grabbyOpen);
-        wait(0.1);
+        dispense();
         wrist.setPosition(wristParallel);
         wait(0.5);
         // Parks in position for TeleOp
         grab();
         wrist.setPosition(wristParallel);
-        twisty.setPosition(twistyPerpendicular);
         Actions.runBlocking(new SequentialAction(tab8.build()));
     }
 
@@ -239,7 +231,6 @@ public class Basket extends LinearOpMode {
         grabExtend.setTargetPosition(200);
         grabPivot.setTargetPosition(grabPivotScore);
         waitForMotors();
-        twisty.setPosition(twistyParallel);
         wrist.setPosition(wristParallel);
         grabExtend.setTargetPosition(grabExtendOut);
     }
@@ -267,7 +258,6 @@ public class Basket extends LinearOpMode {
         switchToAuto();
 
         wrist.setPosition(wristParallel);
-        grabby.setPosition(grabbyOpen);
 
         grabPivot.setPower(0.6);
         grabExtend.setPower(1.0);
@@ -316,6 +306,22 @@ public class Basket extends LinearOpMode {
                 break;
             }
         }
+    }
+
+    public void capture() {
+        wheel1.setPower(-1.0);
+        wheel2.setPower(1.0);
+        wait(0.5);
+        wheel1.setPower(0);
+        wheel2.setPower(0);
+    }
+
+    public void dispense() {
+        wheel1.setPower(1.0);
+        wheel2.setPower(-1.0);
+        wait(0.5);
+        wheel1.setPower(0);
+        wheel2.setPower(0);
     }
 
     public void wait(double time) {

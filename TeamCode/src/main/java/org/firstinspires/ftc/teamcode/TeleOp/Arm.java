@@ -22,7 +22,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
@@ -36,8 +35,8 @@ public class Arm extends OpMode {
     DcMotor pullExtend;
 
     Servo wrist;
-    Servo grabby;
-    Servo twisty;
+    CRServo wheel1;
+    CRServo wheel2;
 
     // Predefined positions of the motors:
     String grabArmPosition;
@@ -100,8 +99,8 @@ public class Arm extends OpMode {
         pullExtend = hardwareMap.get(DcMotor.class, "pullExtend");              // Expansion Hub 3
 
         wrist = hardwareMap.get(Servo.class, "wrist");                          // Control Hub 0
-        grabby = hardwareMap.get(Servo.class, "grabby");                        // Control Hub 1
-        twisty = hardwareMap.get(Servo.class, "twisty");                        // Control Hub 2
+        wheel1 = hardwareMap.get(CRServo.class, "wheel1");                      // Control Hub 1
+        wheel2 = hardwareMap.get(CRServo.class, "wheel2");                      // Control Hub 2
 
         // Set motors to brake upon zero power:
 
@@ -146,8 +145,6 @@ public class Arm extends OpMode {
         // Displays info on Driver Hub:
 
         telemetry.addData("Wrist Position", wrist.getPosition());
-        telemetry.addData("Grabby Position", grabby.getPosition());
-        telemetry.addData("Twisty Position", twisty.getPosition());
 
         telemetry.addData("grabExtend Target Position: ", grabExtend.getTargetPosition());
         telemetry.addData("pullExtend Target Position: ", pullExtend.getTargetPosition());
@@ -165,13 +162,6 @@ public class Arm extends OpMode {
         grabExtend.setPower(gamepad1.right_stick_y * 0.5 + gamepad2.right_stick_y * 0.5);
         grabPivot.setPower(gamepad1.right_stick_x * 0.5 + gamepad2.right_stick_x * 0.5);
 
-        if (gamepad1.a && !aLastTime) {
-            grabby.setPosition(grabby.getPosition() + 0.05);
-        }
-
-        if (gamepad1.b && !bLastTime) {
-            grabby.setPosition(grabby.getPosition() - 0.05);
-        }
 
         if (gamepad1.x && !xLastTime) {
             wrist.getController().pwmDisable();
@@ -190,13 +180,6 @@ public class Arm extends OpMode {
             wrist.setPosition(wrist.getPosition() - 0.05);
         }
 
-        if (gamepad1.dpad_left && !dpadLeftLastTime) {
-            twisty.setPosition(twisty.getPosition() - 0.05);
-        }
-
-        if (gamepad1.dpad_right && !dpadRightLastTime) {
-            twisty.setPosition(twisty.getPosition() + 0.05);
-        }
 
         if (gamepad1.left_stick_button && !leftStickButtonLastTime) {
             resetPositions();

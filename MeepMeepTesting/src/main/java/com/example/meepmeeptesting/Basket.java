@@ -31,7 +31,7 @@ public class Basket {
                 .splineToLinearHeading(new Pose2d(52, 52, Math.PI * 1.33), Math.PI * 0.6)
                 //drop block
                 .setTangent(Math.PI * 1.5)
-                .splineToLinearHeading(new Pose2d(54, 24, Math.PI * 0), Math.PI * 1.5)
+                .splineToLinearHeading(new Pose2d(57, 36 , Math.PI * 1.75), Math.PI * 1.75)
                 //grab block
                 .setTangent(Math.PI * 0.5)
                 .splineToLinearHeading(new Pose2d(52, 52, Math.PI * 1.33), Math.PI * 0.5)

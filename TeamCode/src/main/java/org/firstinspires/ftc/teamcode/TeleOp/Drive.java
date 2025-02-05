@@ -198,6 +198,8 @@ public class Drive extends OpMode {
 
         grabArmPosition = "rest";
 
+        wrist.setPosition(wristParallel);
+
         switchToAuto();
     }
 
@@ -291,12 +293,12 @@ public class Drive extends OpMode {
 
         if (gamepad2.dpad_right) {
             grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            grabPivot.setPower(-0.1);
+            grabPivot.setPower(-0.2);
             isHoldingGrabPivot = false;
         }
-        else if (gamepad2.dpad_left && grabPivot.getCurrentPosition() > grabPivotDown) {
+        else if (gamepad2.dpad_left) {
             grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            grabPivot.setPower(0.2);
+            grabPivot.setPower(0.4);
             isHoldingGrabPivot = false;
         }
         else if (!isHoldingGrabPivot) {
