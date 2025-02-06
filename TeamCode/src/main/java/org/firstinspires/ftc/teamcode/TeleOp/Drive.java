@@ -172,20 +172,20 @@ public class Drive extends OpMode {
         pullExtendOut = -9000;
 
         grabPivotRest = 1700;
-        grabPivotGrab = 980;
+        grabPivotGrab = 580;
         grabPivotSpecimenGrab = 1200;
         grabPivotDown = 590;
-        grabPivotScore = 2500;
+        grabPivotScore = 2600;
 
         grabExtendIn = 100;
         grabExtendMid = 1080;
         grabExtendOut = 2100;
 
-        wristRest = 0.05;
-        wristGrab = 0.25;
+        wristRest = 0.15;
+        wristGrab = 0.7;
         wristSpecimenGrab = 0.4;
         wristParallel = 0.6;
-        wristScore = 0.75;
+        wristScore = 0.7;
         wristHang = 1.0;
 
         grabbyOpen = 0.54;
@@ -312,11 +312,17 @@ public class Drive extends OpMode {
             grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabExtend.setPower(-0.4);
             isHoldingGrabExtend = false;
+            if (grabArmPosition.equals("grab")) {
+                wrist.setPosition(0.65 + 0.0000357 * (1400 - grabExtend.getCurrentPosition()));
+            }
         }
-        else if (gamepad2.dpad_up && grabExtend.getCurrentPosition() < 1400) {
+        else if (gamepad2.dpad_up && (grabExtend.getCurrentPosition() < 1400 || !grabArmPosition.equals("grab"))) {
             grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabExtend.setPower(0.4);
             isHoldingGrabExtend = false;
+            if (grabArmPosition.equals("grab")) {
+                wrist.setPosition(wristGrab - 0.0000357 * grabExtend.getCurrentPosition());
+            }
         }
         else if (!isHoldingGrabExtend) {
             grabExtend.setTargetPosition(grabExtend.getCurrentPosition());
@@ -490,6 +496,7 @@ public class Drive extends OpMode {
         }
 
         if (grabArmPosition.equals("score")) {
+            wrist.setPosition(wristParallel);
             grabPivot.setPower(0.5);
             grabExtend.setPower(1.0);
         }
@@ -533,9 +540,9 @@ public class Drive extends OpMode {
             grabExtend.setPower(1.0);
 
             wrist.setPosition(wristParallel);
-
-            grabExtend.setTargetPosition(grabExtendIn);
             grabPivot.setTargetPosition(grabPivotGrab);
+            wait(0.1);
+            grabExtend.setTargetPosition(grabExtendIn);
         }
 
         isWaitingForMotors = true;
