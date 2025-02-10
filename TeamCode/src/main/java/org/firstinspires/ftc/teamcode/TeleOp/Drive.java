@@ -185,7 +185,7 @@ public class Drive extends OpMode {
         wristGrab = 0.7;
         wristSpecimenGrab = 0.4;
         wristParallel = 0.6;
-        wristScore = 0.7;
+        wristScore = 0.8;
         wristHang = 1.0;
 
         grabbyOpen = 0.54;
