@@ -130,7 +130,7 @@ public class Arm extends OpMode {
 
         grabArmPosition = "start";
 
-        wrist.setPosition(wristParallel);
+        wrist.setPosition(0.75);
 
     }
 
