@@ -240,9 +240,9 @@ public class Drive extends OpMode {
             wheel2.setPower(0.0);
         }
 
-        if (gamepad1.b && !bLastTime) {
-            grabSpecimen();
-        }
+//        if (gamepad1.b && !bLastTime) {
+//            grabSpecimen();
+//        }
 
         if (gamepad1.y && !bLastTime) {
             scoreSpecimen();
