@@ -44,8 +44,8 @@ public class Drive extends OpMode {
     int pullExtendOut;
     int grabPivotRest;
     int grabPivotGrab;
+    int grabPivotParallel;
     int grabPivotSpecimenGrab;
-    int grabPivotDown;
     int grabPivotScore;
     int grabPivotSpecimenScore;
     int grabExtendIn;
@@ -60,10 +60,6 @@ public class Drive extends OpMode {
     double wristHang;
     double grabbyOpen;
     double grabbyClosed;
-    double twistyParallel;
-    double twistyPerpendicular;
-    double twisty45;
-    double twisty135;
     long preTime;
     boolean driverMode;
     boolean isWaitingForMotors;
@@ -79,8 +75,6 @@ public class Drive extends OpMode {
     boolean isHoldingGrabExtend;
     boolean isHoldingGrabPivot;
     boolean isPullPivotAtRest;
-    boolean isTwistyParallel;
-    boolean isTwisty45;
     double initTime;
 
     // Controller 1 Variables:
@@ -115,7 +109,7 @@ public class Drive extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        speed = new double[]{.35, 0.85};
+        speed = new double[]{.35, 0.9};
         speedIndex = 1;
 
         // Initialize hardware values
@@ -149,8 +143,6 @@ public class Drive extends OpMode {
         leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
         driverMode = false;
-        isTwistyParallel = false;
-        isTwisty45 = false;
         isGrabbyOpen = false;
         isResting = false;
         isGrabbing = false;
@@ -172,9 +164,9 @@ public class Drive extends OpMode {
         pullExtendOut = -9000;
 
         grabPivotRest = 1700;
-        grabPivotGrab = 580;
+        grabPivotGrab = 500;
+        grabPivotParallel = 580;
         grabPivotSpecimenGrab = 1200;
-        grabPivotDown = 590;
         grabPivotScore = 2600;
 
         grabExtendIn = 100;
@@ -182,19 +174,14 @@ public class Drive extends OpMode {
         grabExtendOut = 2100;
 
         wristRest = 0.15;
-        wristGrab = 0.7;
+        wristGrab = 0.65;
         wristSpecimenGrab = 0.4;
         wristParallel = 0.6;
-        wristScore = 0.65;
+        wristScore = 0.75;
         wristHang = 1.0;
 
         grabbyOpen = 0.54;
         grabbyClosed = 0.46;
-
-        twistyParallel = 0.46;
-        twistyPerpendicular = 0.15;
-        twisty45 = 0.3;
-        twisty135 = 0.6;
 
         grabArmPosition = "rest";
 
@@ -244,9 +231,9 @@ public class Drive extends OpMode {
 //            grabSpecimen();
 //        }
 
-        if (gamepad1.y && !bLastTime) {
-            scoreSpecimen();
-        }
+//        if (gamepad1.y && !bLastTime) {
+//            scoreSpecimen();
+//        }
 
         if (gamepad1.dpad_up && !dpadUpLastTime) {
             wrist.setPosition(wrist.getPosition() + 0.05);
@@ -312,23 +299,22 @@ public class Drive extends OpMode {
             grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabExtend.setPower(-0.4);
             isHoldingGrabExtend = false;
-            if (grabArmPosition.equals("grab")) {
-                wrist.setPosition(0.65 + 0.0000357 * (1400 - grabExtend.getCurrentPosition()));
-            }
         }
-        else if (gamepad2.dpad_up && (grabExtend.getCurrentPosition() < 1400 || !grabArmPosition.equals("grab"))) {
+        else if (gamepad2.dpad_up && (grabExtend.getCurrentPosition() < 680 || !grabArmPosition.equals("grab"))) {
             grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabExtend.setPower(0.4);
             isHoldingGrabExtend = false;
-            if (grabArmPosition.equals("grab")) {
-                wrist.setPosition(wristGrab - 0.0000357 * grabExtend.getCurrentPosition());
-            }
         }
         else if (!isHoldingGrabExtend) {
             grabExtend.setTargetPosition(grabExtend.getCurrentPosition());
             grabExtend.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             grabExtend.setPower(1.0);
             isHoldingGrabExtend = true;
+        }
+
+        if ((gamepad2.dpad_up || gamepad2.dpad_down) && grabArmPosition.equals("grab")) {
+            wrist.setPosition(wristGrab - 0.0000357 * grabExtend.getCurrentPosition());
+            grabPivot.setTargetPosition((int)(grabPivotGrab + 0.1642857 * grabExtend.getCurrentPosition()));
         }
 
         if (gamepad2.right_bumper && !rightBumperLastTime2) {
@@ -590,7 +576,8 @@ public class Drive extends OpMode {
         grabPivot.setPower(1.0);
         grabExtend.setPower(1.0);
 
-        grabPivot.setTargetPosition(grabPivotGrab - 100);
+        grabPivot.setTargetPosition(grabPivotParallel);
+        wrist.setPosition(wristParallel);
 
         isRetracting = true;
         isWaitingForMotors = true;

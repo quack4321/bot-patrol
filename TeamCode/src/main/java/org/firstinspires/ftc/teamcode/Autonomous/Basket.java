@@ -118,7 +118,7 @@ public class Basket extends LinearOpMode {
                 .splineToLinearHeading(pose1, Math.PI * 0.25);
         // Score preloaded block
 
-        Pose2d pose2 = new Pose2d(43.75, 43.5, Math.PI * 1.48);
+        Pose2d pose2 = new Pose2d(44.25, 43.5, Math.PI * 1.48);
         TrajectoryActionBuilder tab2 = drive.actionBuilder(pose1)
                 .setTangent(Math.PI * 1.25)
                 .splineToLinearHeading(pose2, Math.PI * 1.5);
@@ -130,12 +130,12 @@ public class Basket extends LinearOpMode {
                 .splineToLinearHeading(pose3, Math.PI * 0.25);
         // Score block 1
 
-        Pose2d pose4 = new Pose2d(55, 43.5, Math.PI * 1.56);
+        Pose2d pose4 = new Pose2d(55.5, 43.5, Math.PI * 1.56);
         TrajectoryActionBuilder tab4 = drive.actionBuilder(pose3)
                 .setTangent(Math.PI * 1.5)
                 .splineToLinearHeading(pose4, Math.PI * 1.5);
         // Grab block 2
-
+ 
         Pose2d pose5 = new Pose2d(47, 54, Math.PI * 1.25);
         TrajectoryActionBuilder tab5 = drive.actionBuilder(pose4)
                 .setTangent(Math.PI * 0.6)
@@ -211,10 +211,6 @@ public class Basket extends LinearOpMode {
         grab();
         Actions.runBlocking(new SequentialAction(tab6.build()));
         wrist.setPosition(wristGrab);
-//        grabPivot.setTargetPosition(grabPivotDown + 50);
-//        wheel1.setPower(-1.0);
-//        wheel2.setPower(1.0);
-//        wait(0.5);
 
         grabPivot.setTargetPosition(grabPivotDown);
         wheel1.setPower(-1.0);
@@ -234,8 +230,11 @@ public class Basket extends LinearOpMode {
         dispense();
         wrist.setPosition(wristParallel);
         wait(0.1);
+
         // Parks in position for TeleOp
-        grab();
+
+        grabPivot.setTargetPosition(1575);
+        grabExtend.setTargetPosition(800);
         wrist.setPosition(wristParallel);
         Actions.runBlocking(new SequentialAction(tab8.build()));
     }
