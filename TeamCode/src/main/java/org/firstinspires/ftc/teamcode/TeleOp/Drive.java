@@ -114,7 +114,7 @@ public class Drive extends OpMode {
     public void init() {
         telemetry.addData("Status", "Initialized");
 
-        speed = new double[]{.35, 0.9};
+        speed = new double[]{.35, 0.85};
         speedIndex = 1;
 
         // Initialize hardware values
@@ -180,7 +180,7 @@ public class Drive extends OpMode {
         grabExtendOut = 2100;
 
         wristRest = 0.15;
-        wristGrab = 0.675;
+        wristGrab = 0.65; // parallel to block when grabbing is 0.675, maybe change back, idk
         wristSpecimen = 0.525;
         wristParallel = 0.6;
         wristScore = 0.75;
@@ -199,6 +199,7 @@ public class Drive extends OpMode {
     @Override
     public void start() {
         preTime = System.currentTimeMillis();
+        pullPivot.setTargetPosition(pullPivotHang);
     }
 
     @Override
@@ -233,13 +234,13 @@ public class Drive extends OpMode {
             wheel2.setPower(0.0);
         }
 
-//        if (gamepad1.b && !bLastTime) {
-//            grabSpecimen();
-//        }
-//
-//        if (gamepad1.y && !bLastTime) {
-//            scoreSpecimen();
-//        }
+        if (gamepad1.b && !bLastTime) {
+            grabSpecimen();
+        }
+
+        if (gamepad1.y && !bLastTime) {
+            scoreSpecimen();
+        }
 
         if (gamepad1.dpad_up && !dpadUpLastTime) {
             wrist.setPosition(wrist.getPosition() + 0.05);
@@ -262,25 +263,26 @@ public class Drive extends OpMode {
         }
 
         // Robot strafes if driver1 holds left/right trigger. Drives normally with joysticks if triggers are not pressed
-        leftFront.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-        leftBack.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-        rightFront.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-        rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+        //oldDrive();
+        newDrive();
 
         // CONTROLLER 2
         if (gamepad2.a && !aLastTime2) {
             rest();
         }
 
-        if (currentMode.equals(scoreMode.SAMPLE)) {
-            if (gamepad2.b && !bLastTime2) {
-                score();
-            }
+        //if (currentMode.equals(scoreMode.SAMPLE)) {
 
-            if (gamepad2.x && !xLastTime2) {
-                grab();
-            }
+        //}
+
+        if (gamepad2.b && !bLastTime2) {
+            score();
         }
+
+        if (gamepad2.x && !xLastTime2) {
+            grab();
+        }
+
         else if (currentMode.equals(scoreMode.SPECIMEN)) {
             if (gamepad2.b && !bLastTime2) {
                 scoreSpecimen();
@@ -300,11 +302,13 @@ public class Drive extends OpMode {
             grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabPivot.setPower(-0.2);
             isHoldingGrabPivot = false;
+            grabArmPosition = "retract";
         }
         else if (gamepad2.dpad_left) {
             grabPivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabPivot.setPower(0.4);
             isHoldingGrabPivot = false;
+            grabArmPosition = "retract";
         }
         else if (!isHoldingGrabPivot) {
             grabPivot.setTargetPosition(grabPivot.getCurrentPosition());
@@ -413,15 +417,16 @@ public class Drive extends OpMode {
                     isRetracting = false;
                 }
 
-                if (isGrabbingSpecimen) {
-                    wrist.setPosition(wristSpecimen);
-                    grabArmPosition = "grab";
-                    isGrabbingSpecimen = false;
+                if (isScoringSpecimen) {
+                    grabExtend.setPower(1.0);
+                    grabExtend.setTargetPosition(grabExtendMid);
+                    grabArmPosition = "scoreSpecimen";
+                    isScoringSpecimen = false;
                 }
             }
         }
 
-        if (System.currentTimeMillis() - preTime > 90000) {
+        if (System.currentTimeMillis() - preTime > 90000 && System.currentTimeMillis() - preTime < 90500) {
             hang();
         }
 
@@ -576,12 +581,12 @@ public class Drive extends OpMode {
         switchToAuto();
 
         grabPivot.setPower(0.8);
-        grabExtend.setPower(1.0);
 
-        grabExtend.setTargetPosition(grabExtendMid);
         wrist.setPosition(wristSpecimen);
         grabPivot.setTargetPosition(grabPivotSpecimenScore);
 
+        isScoringSpecimen = true;
+        isWaitingForMotors = true;
     }
 
     private void retract() {
@@ -616,10 +621,8 @@ public class Drive extends OpMode {
         double initTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - initTime < time * 1000) {
             // Update motor power for the drivetrain based on controller inputs
-            leftFront.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
-            leftBack.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-            rightFront.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
-            rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+            //oldDrive();
+            newDrive();
 
             // Update telemetry periodically
             telemetry.addData("Speed", speed[speedIndex] * 100 + "%");
@@ -631,5 +634,19 @@ public class Drive extends OpMode {
             telemetry.addData("grabPivot Current Position", grabPivot.getCurrentPosition());
             telemetry.update();
         }
+    }
+
+    public void oldDrive() {
+        leftFront.setPower((gamepad1.left_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+        leftBack.setPower((gamepad1.left_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+        rightFront.setPower((gamepad1.right_stick_y + (gamepad1.right_trigger - gamepad1.left_trigger)) * speed[speedIndex]);
+        rightBack.setPower((gamepad1.right_stick_y + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+    }
+
+    public void newDrive() {
+        leftFront.setPower(((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x) + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
+        leftBack.setPower(((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x) + (gamepad1.right_trigger - gamepad1.left_trigger))* speed[speedIndex]);
+        rightFront.setPower(((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x) + (gamepad1.right_trigger - gamepad1.left_trigger))* speed[speedIndex]);
+        rightBack.setPower(((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x) + (gamepad1.left_trigger - gamepad1.right_trigger)) * speed[speedIndex]);
     }
 }
