@@ -53,10 +53,9 @@ public class Drive extends OpMode {
     int grabExtendOut;
     double wristRest;
     double wristGrab;
-    double wristSpecimenGrab;
+    double wristSpecimen;
     double wristParallel;
     double wristScore;
-    double wristSpecimenScore;
     double wristHang;
     double grabbyOpen;
     double grabbyClosed;
@@ -76,6 +75,12 @@ public class Drive extends OpMode {
     boolean isHoldingGrabPivot;
     boolean isPullPivotAtRest;
     double initTime;
+    enum scoreMode {
+        SAMPLE,
+        SPECIMEN
+    }
+
+    scoreMode currentMode = scoreMode.SAMPLE;
 
     // Controller 1 Variables:
     boolean rightBumperLastTime;
@@ -166,16 +171,17 @@ public class Drive extends OpMode {
         grabPivotRest = 1700;
         grabPivotGrab = 500;
         grabPivotParallel = 580;
-        grabPivotSpecimenGrab = 1200;
+        grabPivotSpecimenGrab = 1300;
+        grabPivotSpecimenScore = 2100;
         grabPivotScore = 2600;
 
         grabExtendIn = 100;
-        grabExtendMid = 1080;
+        grabExtendMid = 485;
         grabExtendOut = 2100;
 
         wristRest = 0.15;
-        wristGrab = 0.65;
-        wristSpecimenGrab = 0.4;
+        wristGrab = 0.675;
+        wristSpecimen = 0.525;
         wristParallel = 0.6;
         wristScore = 0.75;
         wristHang = 1.0;
@@ -230,7 +236,7 @@ public class Drive extends OpMode {
 //        if (gamepad1.b && !bLastTime) {
 //            grabSpecimen();
 //        }
-
+//
 //        if (gamepad1.y && !bLastTime) {
 //            scoreSpecimen();
 //        }
@@ -266,13 +272,25 @@ public class Drive extends OpMode {
             rest();
         }
 
-        if (gamepad2.b && !bLastTime2) {
-            score();
+        if (currentMode.equals(scoreMode.SAMPLE)) {
+            if (gamepad2.b && !bLastTime2) {
+                score();
+            }
+
+            if (gamepad2.x && !xLastTime2) {
+                grab();
+            }
+        }
+        else if (currentMode.equals(scoreMode.SPECIMEN)) {
+            if (gamepad2.b && !bLastTime2) {
+                scoreSpecimen();
+            }
+
+            if (gamepad2.x && !xLastTime2) {
+                grabSpecimen();
+            }
         }
 
-        if (gamepad2.x && !xLastTime2) {
-            grab();
-        }
 
         if (gamepad2.y && !yLastTime2) {
             hang();
@@ -336,12 +354,20 @@ public class Drive extends OpMode {
             switchToAuto();
         }
 
-        if (gamepad2.right_trigger > .5) {
-            switchToDriver();
+//        if (gamepad2.right_trigger > .5) {
+//            switchToDriver();
+//        }
+//
+//        if (gamepad2.left_trigger > .5) {
+//            switchToAuto();
+//        }
+
+        if (gamepad2.left_stick_button && !leftStickButtonLastTime2) {
+            currentMode = scoreMode.SAMPLE;
         }
 
-        if (gamepad2.left_trigger > .5) {
-            switchToAuto();
+        if (gamepad2.right_stick_button && !rightStickButtonLastTime2) {
+            currentMode = scoreMode.SPECIMEN;
         }
 
         if (driverMode) {
@@ -388,19 +414,17 @@ public class Drive extends OpMode {
                 }
 
                 if (isGrabbingSpecimen) {
-                    wrist.setPosition(wristSpecimenGrab);
+                    wrist.setPosition(wristSpecimen);
                     grabArmPosition = "grab";
                     isGrabbingSpecimen = false;
                 }
-
-                if (isScoringSpecimen) {
-                    wrist.setPosition(wristSpecimenScore);
-                    grabExtend.setTargetPosition(grabExtendMid);
-                    grabArmPosition = "score";
-                    isScoringSpecimen = false;
-                }
             }
         }
+
+        if (System.currentTimeMillis() - preTime > 90000) {
+            hang();
+        }
+
 
         aLastTime = gamepad1.a;
         bLastTime = gamepad1.b;
@@ -457,7 +481,6 @@ public class Drive extends OpMode {
     public void hang() {
         switchToAuto();
         pullExtend.setPower(1.0);
-        grabPivot.setPower(0.5);
 
         if (isPullExtendOut) {
             pullExtend.setTargetPosition(pullExtendIn);
@@ -539,35 +562,26 @@ public class Drive extends OpMode {
     public void grabSpecimen() {
         switchToAuto();
 
-        isGrabbyOpen = true;
+        grabPivot.setPower(0.8);
+        grabExtend.setPower(1.0);
 
-        if (grabArmPosition.equals("rest")) {
-            grabPivot.setPower(1.0);
-            grabExtend.setPower(1.0);
+        grabPivot.setTargetPosition(grabPivotSpecimenGrab);
+        grabExtend.setTargetPosition(grabExtendIn);
+        wrist.setPosition(wristSpecimen);
 
-            wrist.setPosition(wristParallel);
-            wait(.5);
-            grabExtend.setTargetPosition(grabExtendIn);
-            grabPivot.setTargetPosition(grabPivotSpecimenGrab);
-        }
-
-        isWaitingForMotors = true;
-        isGrabbingSpecimen = true;
-        initTime = System.currentTimeMillis();
+        grabArmPosition = "grabSpecimen";
     }
 
     public void scoreSpecimen() {
         switchToAuto();
+
         grabPivot.setPower(0.8);
         grabExtend.setPower(1.0);
 
-        grabExtend.setTargetPosition(200);
-        wrist.setPosition(wristParallel);
+        grabExtend.setTargetPosition(grabExtendMid);
+        wrist.setPosition(wristSpecimen);
         grabPivot.setTargetPosition(grabPivotSpecimenScore);
 
-        isWaitingForMotors = true;
-        isScoringSpecimen = true;
-        initTime = System.currentTimeMillis();
     }
 
     private void retract() {

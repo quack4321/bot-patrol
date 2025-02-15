@@ -97,17 +97,13 @@ public final class MecanumDrive {
 
     public final TurnConstraints defaultTurnConstraints = new TurnConstraints(
             PARAMS.maxAngVel, -PARAMS.maxAngAccel, PARAMS.maxAngAccel);
+
     public final VelConstraint defaultVelConstraint =
             new MinVelConstraint(Arrays.asList(
-                    kinematics.new WheelVelConstraint(PARAMS.maxWheelVel),
+                    kinematics.new WheelVelConstraint(PARAMS.maxWheelVel + 10),
                     new AngularVelConstraint(PARAMS.maxAngVel)
             ));
 
-    public final VelConstraint slowerVelConstraint =
-            new MinVelConstraint(Arrays.asList(
-                    kinematics.new WheelVelConstraint(20),
-                    new AngularVelConstraint(20)
-            ));
     public final AccelConstraint defaultAccelConstraint =
             new ProfileAccelConstraint(PARAMS.minProfileAccel, PARAMS.maxProfileAccel);
     public final AccelConstraint slowerAccelConstraint =
@@ -520,4 +516,20 @@ public final class MecanumDrive {
                 defaultVelConstraint, slowerAccelConstraint
         );
     }
+
+//    public TrajectoryActionBuilder fasterActionBuilder(Pose2d beginPose) {
+//        return new TrajectoryActionBuilder(
+//                TurnAction::new,
+//                FollowTrajectoryAction::new,
+//                new TrajectoryBuilderParams(
+//                        1e-6,
+//                        new ProfileParams(
+//                                0.25, 0.1, 1e-2
+//                        )
+//                ),
+//                beginPose, 0.0,
+//                higherTurnConstraints,
+//                higherVelConstraint, higherAccelConstraint
+//        );
+//    }
 }
