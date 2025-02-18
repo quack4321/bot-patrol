@@ -99,7 +99,7 @@ public class Clip extends LinearOpMode {
         grabPivotDown = 100; // was 580
         grabPivotScore = 2800;
         grabExtendIn = 100;
-        grabExtendMid = 485;
+        grabExtendMid = 535;
         grabExtendOut = 2100;
         wristRest = 0.15;
         wristGrab = 0.7;
@@ -116,16 +116,16 @@ public class Clip extends LinearOpMode {
         rest();
 
         Pose2d initialPose = new Pose2d(-7.5, 61.7, Math.PI * 1.5);
-        Pose2d pose1 = new Pose2d(-7.5, 36, Math.PI * 1.5);
+        Pose2d pose1 = new Pose2d(-7.5, 34, Math.PI * 1.5);
         Pose2d pose2 = new Pose2d(-36, 30, Math.PI * 1.5);
         Pose2d pose3 = new Pose2d(-45, 15, Math.PI * 0.5);
         Pose2d pose4 = new Pose2d(-45, 56, Math.PI * 0.5);
         Pose2d pose5 = new Pose2d(-45, 15, Math.PI * 0.5);
-        Pose2d pose6 = new Pose2d(-53, 55.75, Math.PI * 0.5);
-        Pose2d pose7 = new Pose2d(0, pose1.position.y + 1.5, Math.PI * 1.5);
+        Pose2d pose6 = new Pose2d(-53, 56.75, Math.PI * 0.5);
+        Pose2d pose7 = new Pose2d(0, pose1.position.y - 0.5, Math.PI * 1.5);
         Pose2d pose71 = new Pose2d(0, pose1.position.y + 12, Math.PI * 1.5);
-        Pose2d pose8 = new Pose2d(-53, 55.5, Math.PI * 0.5);
-        Pose2d pose9 = new Pose2d(-11, pose1.position.y + 1.5, Math.PI * 1.5);
+        Pose2d pose8 = new Pose2d(-53, 57.5, Math.PI * 0.5);
+        Pose2d pose9 = new Pose2d(-11, pose1.position.y - 0.5, Math.PI * 1.5);
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -133,10 +133,13 @@ public class Clip extends LinearOpMode {
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
                 .setTangent(Math.PI * 1.5)
                 .splineToLinearHeading(pose1, Math.PI * 1.5);
+        // Scores preloaded block
+
 
         TrajectoryActionBuilder tab2 = drive.actionBuilder(pose1)
                 .setTangent(Math.PI * 0.5)
                 .splineToConstantHeading(pose2.position, Math.PI * 1.5);
+        // Drives around truss a bit
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(pose2)
                 .setTangent(Math.PI * 1.5)
@@ -149,22 +152,28 @@ public class Clip extends LinearOpMode {
                 .splineToLinearHeading(pose5, Math.PI * 1.5)
                 .setTangent(Math.PI * 1.0)
                 .splineToLinearHeading(pose6, Math.PI * 0.5);
+        // Push first 2 blocks
+        // Grabs first block
 
         TrajectoryActionBuilder tab4 = drive.actionBuilder(pose6)
                 .setTangent(Math.PI * 1.75)
                 .splineToLinearHeading(pose7, Math.PI * 1.5);
+        // Score first block
 
         TrajectoryActionBuilder tab41 = drive.actionBuilder(pose7)
                 .setTangent(Math.PI * 0.5)
                 .splineToLinearHeading(pose71, Math.PI * 0.5);
+        // Backs up from truss
 
         TrajectoryActionBuilder tab5 = drive.actionBuilder(pose71)
                 .setTangent(Math.PI * 0.75)
                 .splineToLinearHeading(pose8, Math.PI * 0.5);
+        // Drive and grab to second block
 
         TrajectoryActionBuilder tab6 = drive.actionBuilder(pose8)
                 .setTangent(Math.PI * 1.75)
                 .splineToLinearHeading(pose9, Math.PI * 1.5);
+        // Drive to and score second block
 
         waitForStart();
 

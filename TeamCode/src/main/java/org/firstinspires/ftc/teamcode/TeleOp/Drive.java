@@ -51,6 +51,7 @@ public class Drive extends OpMode {
     int grabExtendIn;
     int grabExtendMid;
     int grabExtendOut;
+    int grabExtendGrabLimit;
     double wristRest;
     double wristGrab;
     double wristSpecimen;
@@ -178,12 +179,13 @@ public class Drive extends OpMode {
         grabExtendIn = 100;
         grabExtendMid = 485;
         grabExtendOut = 2100;
+        grabExtendGrabLimit = 1400;
 
         wristRest = 0.15;
         wristGrab = 0.65; // parallel to block when grabbing is 0.675, maybe change back, idk
         wristSpecimen = 0.525;
         wristParallel = 0.6;
-        wristScore = 0.75;
+        wristScore = 0.7;
         wristHang = 1.0;
 
         grabbyOpen = 0.54;
@@ -263,8 +265,8 @@ public class Drive extends OpMode {
         }
 
         // Robot strafes if driver1 holds left/right trigger. Drives normally with joysticks if triggers are not pressed
-        //oldDrive();
-        newDrive();
+        oldDrive();
+        //newDrive();
 
         // CONTROLLER 2
         if (gamepad2.a && !aLastTime2) {
@@ -322,7 +324,7 @@ public class Drive extends OpMode {
             grabExtend.setPower(-0.4);
             isHoldingGrabExtend = false;
         }
-        else if (gamepad2.dpad_up && (grabExtend.getCurrentPosition() < 680 || !grabArmPosition.equals("grab"))) {
+        else if (gamepad2.dpad_up && (grabExtend.getCurrentPosition() < grabExtendGrabLimit || !grabArmPosition.equals("grab"))) {
             grabExtend.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             grabExtend.setPower(0.4);
             isHoldingGrabExtend = false;
@@ -621,8 +623,8 @@ public class Drive extends OpMode {
         double initTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - initTime < time * 1000) {
             // Update motor power for the drivetrain based on controller inputs
-            //oldDrive();
-            newDrive();
+            oldDrive();
+            //newDrive();
 
             // Update telemetry periodically
             telemetry.addData("Speed", speed[speedIndex] * 100 + "%");
